@@ -1,4 +1,6 @@
+// #include <msp430.h>
 #include "clib.h"
+#include "lcd_drv.h"
 
 extern int c_mode;
 
@@ -12,9 +14,16 @@ int main(void)
 	}
 	else if (c_mode == SEL_MD) {
 	/* write data to LCD */
-	
 		;//TODO
 	} 
-
+	else if (c_mode == T_SET_MD) {
+	/* write data to LCD */
+		;//TODO
+	}
+	else if (c_mode == C_SET_MD) {
+	/* write data to LCD */
+		;//TODO
+	}
+	
 	return 0;
 }
