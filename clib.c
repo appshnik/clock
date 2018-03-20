@@ -24,7 +24,11 @@ void gpio_init(void)
 /* variables init */
 //TODO
 /* MCLK init */
-//TODO
+void mclk_init(void)
+{
+	BCSCTL2 = DIVM_0 | SELM_3;
+	BCSCTL3 = LFXT1S_2;
+}
 /* initializaton routine */
 void init_device()
 {
