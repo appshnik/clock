@@ -84,16 +84,21 @@ void lcd_init(void)
 	/* set interface to 4-bits long */
 	lcd_wr_init_ins(0x20);
 	/* set number of lines and character font */
-	lcd_wr_init_ins(0xC0);
+//	lcd_wr_init_ins(0x20);
+//	lcd_wr_init_ins(0xC0);
+	lcd_wr_ins(0x26);	
 	/* display on */
-	lcd_wr_init_ins(0x00);
-	lcd_wr_init_ins(0xF0);
+//	lcd_wr_init_ins(0x00);
+//	lcd_wr_init_ins(0xF0);
+	lcd_wr_ins(0x0F);	
 	/* display clear */
-	lcd_wr_init_ins(0x00);
-	lcd_wr_init_ins(0x10);
+//	lcd_wr_init_ins(0x00);
+//	lcd_wr_init_ins(0x10);
+	lcd_wr_ins(0x01);	
 	/* entry mode set */
-	lcd_wr_init_ins(0x00);
-	lcd_wr_init_ins(0x60);
+//	lcd_wr_init_ins(0x00);
+//	lcd_wr_init_ins(0x60);
+	lcd_wr_ins(0x06);	
 }
 /* LCD write string */
 void lcd_str(const char *str, uint8_t ddram_ptr)

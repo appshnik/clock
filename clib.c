@@ -1,9 +1,11 @@
 // #include <msp430.h>
 #include "clib.h"
+#include "lcd_drv.h"
 
 /* global variables */
-int year, month, day, hour, min, sec;
-int c_mode;	// current clock mode
+char top_str[STR_LEN];	// top string of LCD
+char bot_str[STR_LEN];	// bottom string of LCD
+int c_mode;		// current clock mode
 
 /* desable WDT */
 void wdt_init(void)
@@ -30,17 +32,17 @@ void mclk_init(void)
 	BCSCTL3 = LFXT1S_2;
 }
 /* initializaton routine */
-void init_device()
+void init_device(void)
 {
+	mclk_init();
 	__enable_interrupt();
 	wdt_init();
 	gpio_init();
 	//var_init();
-	//mclk_init();
 }
 
 /* port 2 interrupt service routine */
-__attribute__((interrupt(PORT1_VECTOR)))
+__attribute__((interrupt(PORT2_VECTOR)))
 void keyboard_isr(void)
 {	
 	/* change clock mode */
@@ -48,11 +50,12 @@ void keyboard_isr(void)
 		c_mode = SEL_MD;
 	}
 	else if (c_mode == SEL_MD) {
-		;
+		;//TODO
 	}
 	/* start setting timer */
 	//TODO
 	/* process "set" button event */
+	//TODO
 	P2IFG = P2IFG & (~0x0F);
 
 }
