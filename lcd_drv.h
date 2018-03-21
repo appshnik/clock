@@ -8,10 +8,12 @@
 
 void strobe(void);
 void lcd_busy(void);
-void lcd_wr(unsigned short int);
-void lcd_wr_ins(unsigned short int);
-void lcd_wr_dt(unsigned short int);
-void lcd_wr_init_ins(unsigned short int);
+void lcd_wr(uint8_t);
+void lcd_wr_ins(uint8_t);
+void lcd_wr_dt(uint8_t);
+void lcd_wr_init_ins(uint8_t);
 void lcd_init(void);
+void lcd_str(const char *, uint8_t);
+void lcd_clr(void);
 
 #endif // LCD_DRV

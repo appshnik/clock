@@ -28,7 +28,7 @@ void lcd_busy(void)
 }
 
 /* LCD write */
-void lcd_wr(unsigned short int data)
+void lcd_wr(uint8_t data)
 {
 	int i = 0; 
 	/* configure LCD port as output */
@@ -46,21 +46,21 @@ void lcd_wr(unsigned short int data)
 }
 
 /* LCD write instruction*/
-void lcd_wr_ins(unsigned short int ins_code)
+void lcd_wr_ins(uint8_t ins_code)
 {
 	lcd_busy();
 	LCD_RS(0);
 	lcd_wr(ins_code);
 }
 /* LCD write data*/
-void lcd_wr_dt(unsigned short int data)
+void lcd_wr_dt(uint8_t data)
 {
 	lcd_busy();
 	LCD_RS(1);
 	lcd_wr(data);
 }
 /* LCD write init instruction */
-void lcd_wr_init_ins(unsigned short int cmd)
+void lcd_wr_init_ins(uint8_t cmd)
 {
 	P2OUT &= 0x0;
 	P2OUT |= cmd;
@@ -94,4 +94,20 @@ void lcd_init(void)
 	/* entry mode set */
 	lcd_wr_init_ins(0x00);
 	lcd_wr_init_ins(0x60);
+}
+/* LCD write string */
+void lcd_str(const char *str, uint8_t ddram_ptr)
+{
+	uint8_t symb = 0;
+	/* set DDRAM address to write from */
+	lcd_wr_ins(ddram_ptr);
+	while (*str) {
+		symb = *str++;
+		lcd_wr_dt(symb);
+	}
+}
+/* clear LCD */
+void lcd_clr(void)
+{
+	lcd_wr_ins(0x01);
 }
