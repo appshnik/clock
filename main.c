@@ -8,8 +8,10 @@ int main(void)
 {
 	/* initialization */
 	init_device();
+	__delay_ms(1000);
 	lcd_init();
 	/* main program loop */
+	
 	while (1) {
 		if (c_mode == MAIN_MD) {
 		/* read data from RTC */

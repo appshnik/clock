@@ -5,7 +5,7 @@
 #include <msp430.h>
 
 /* constants definition */
-#define CPU_F		(32768UL)		// oscilator frequency
+#define CPU_F		(1600000UL)		// oscilator frequency
 #define STR_LEN		(16)			// LCD string length
 #define MAIN_MD		(1)			// MAIN clock mode
 #define SEL_MD		(2)			// select clock mode
@@ -27,6 +27,7 @@
 /* function macroses */
 #define __delay_ms(ms)	__delay_cycles((CPU_F*ms)/1000UL)
 #define __delay_us(us)	__delay_cycles((CPU_F*us)/1000000UL)
+#define __delay_ns(ns)	__delay_cycles((CPU_F*ns)/1000000000UL)
 
 /* function prototipes */
 void init_device(void);

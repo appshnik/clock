@@ -6,7 +6,7 @@
 void strobe(void)
 {
 	LCD_E(1);
-	__delay_us(1);
+	__delay_us(2);
 	LCD_E(0);	
 }
 
@@ -62,50 +62,58 @@ void lcd_wr_dt(uint8_t data)
 /* LCD write init instruction */
 void lcd_wr_init_ins(uint8_t cmd)
 {
-	P2OUT &= 0x0;
-	P2OUT |= cmd;
-	strobe();
+	/* configure RS and RW bits */
+	LCD_RS(0);
+	LCD_RW(0);
+
+	P2OUT &= 0x00;	// clear data bus
+	__delay_ns(50);
+
+	LCD_E(1);	// enable operation
+	__delay_ns(1);
+	
+	P2OUT |= cmd;	// write data to bus
+	__delay_ns(100);
+
+	LCD_E(0);
+	__delay_ns(50);
+	__delay_ns(300);
 }
 /* LCD initialize */
 void lcd_init(void)
 {
-	/* configure LCD port as output */
+	/* set port 2 as output */
 	P2DIR |= LCD_BUS_MASK;
-	/* configure RS and RW bits */
-	LCD_RS(0);
-	LCD_RW(0);
 	/* start inintialization routine */
-	__delay_ms(20);
+	__delay_ms(50);
 	lcd_wr_init_ins(0x30);
 	__delay_ms(5);
 	lcd_wr_init_ins(0x30);
-	__delay_us(150);
+	__delay_ms(5);
 	lcd_wr_init_ins(0x30);
-	/* set interface to 4-bits long */
+	__delay_ms(5);
 	lcd_wr_init_ins(0x20);
-	/* set number of lines and character font */
-//	lcd_wr_init_ins(0x20);
-//	lcd_wr_init_ins(0xC0);
-	lcd_wr_ins(0x26);	
-	/* display on */
-//	lcd_wr_init_ins(0x00);
-//	lcd_wr_init_ins(0xF0);
-	lcd_wr_ins(0x0F);	
-	/* display clear */
-//	lcd_wr_init_ins(0x00);
-//	lcd_wr_init_ins(0x10);
-	lcd_wr_ins(0x01);	
-	/* entry mode set */
-//	lcd_wr_init_ins(0x00);
-//	lcd_wr_init_ins(0x60);
-	lcd_wr_ins(0x06);	
+	__delay_ms(5);
+	lcd_wr_init_ins(0x20);
+	lcd_wr_init_ins(0xC0);
+	__delay_ms(5);
+	lcd_wr_init_ins(0x00);
+	lcd_wr_init_ins(0xF0);
+	__delay_ms(5);
+	lcd_wr_init_ins(0x00);
+	lcd_wr_init_ins(0x10);
+	__delay_ms(5);
+	lcd_wr_init_ins(0x00);
+	lcd_wr_init_ins(0x20);
+
+
 }
 /* LCD write string */
 void lcd_str(const char *str, uint8_t ddram_ptr)
 {
 	uint8_t symb = 0;
 	/* set DDRAM address to write from */
-	lcd_wr_ins(ddram_ptr);
+	lcd_wr_ins(ddram_ptr | 0x80);
 	while (*str) {
 		symb = *str++;
 		lcd_wr_dt(symb);

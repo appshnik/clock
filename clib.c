@@ -10,17 +10,19 @@ int c_mode;		// current clock mode
 /* desable WDT */
 void wdt_init(void)
 {
-	WDTCTL = WDTCTL | WDTHOLD;
+	WDTCTL = WDTPW | WDTHOLD;
 }
 
 /* ports 1 and 2 initialization */
 void gpio_init(void)
 {
 	P2DIR = 0xF0; // port 2 pins 0, 1, 2, 3 are configured as inputs
+	P2OUT = 0x00;
 	P2IES = 0x0F; // high-low transition causes interrupt
 	P2IE  = 0x0F; // buttons interrupts are enabled
 
 	P1DIR = 0xFF; // port 1 pins are configured as outputs
+	P1OUT = 0x00;
 }
 
 /* variables init */
@@ -28,15 +30,16 @@ void gpio_init(void)
 /* MCLK init */
 void mclk_init(void)
 {
-	BCSCTL2 = DIVM_0 | SELM_3;
-	BCSCTL3 = LFXT1S_2;
+	DCOCTL = (DCOCTL | DCO0 | DCO1) & ~(DCO2);
+	BCSCTL1 = (BCSCTL1 | RSEL3) & ~(RSEL0) & ~(RSEL1) & ~(RSEL2);
+	BCSCTL2 = DIVM_0 | SELM_0;
 }
 /* initializaton routine */
 void init_device(void)
 {
-	mclk_init();
-	__enable_interrupt();
+//	__enable_interrupt();
 	wdt_init();
+	mclk_init();
 	gpio_init();
 	//var_init();
 }
