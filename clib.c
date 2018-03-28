@@ -27,12 +27,11 @@ void gpio_init(void)
 
 /* variables init */
 //TODO
-/* MCLK init */
+/* MCLK init as 16 MHz*/
 void mclk_init(void)
 {
-	DCOCTL = (DCOCTL | DCO0 | DCO1) & ~(DCO2);
-	BCSCTL1 = (BCSCTL1 | RSEL3) & ~(RSEL0) & ~(RSEL1) & ~(RSEL2);
-	BCSCTL2 = DIVM_0 | SELM_0;
+	DCOCTL = CALDCO_16MHZ;
+	BCSCTL1 = CALBC1_16MHZ;
 }
 /* initializaton routine */
 void init_device(void)

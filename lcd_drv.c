@@ -1,126 +1,187 @@
-#include "clib.h"
 #include "lcd_drv.h"
 
+#ifndef CPU_F
+#define CPU_F		16000000UL	// MCLK frequency
+#endif
+/* LCD initialization routine indicator */
+unsigned char init_flag;
 
-/* LCD strobe */
-void strobe(void)
-{
-	LCD_E(1);
-	__delay_us(2);
-	LCD_E(0);	
-}
-
-/* LCD busy check */
-void lcd_busy(void)
-{
-	int busy_flag;
-	/* configure LCD port as input */
-	P2DIR &= ~(LCD_BUS_MASK);
-	/* switch LCD to read mode */
-	LCD_RS(0);
-	LCD_RW(1);
-
-	do {
-		strobe();
-		busy_flag = P2IN & (1<<7);
-		__delay_us(2);
-	} while (busy_flag);	
-}
-
-/* LCD write */
-void lcd_wr(uint8_t data)
-{
-	int i = 0; 
-	/* configure LCD port as output */
-	P2DIR |= LCD_BUS_MASK;
-	/* swith LCD to write mode */
-	LCD_RW(0);
-	/* transfer data (MS nible first) */
-	while (i <= 4) {
-		P2OUT = 0x0;
-		P2OUT = (data << i) & LCD_BUS_MASK;
-		strobe();
-		i += 4;
+/* reads data from LCD */
+unsigned char read(void)
+{	
+	unsigned char ret_val = 0x00;
+	if (BUS_WIDTH == 8) {
+		LCD_B_DIR &= ~LCD_B_MSK;
+		_CLEAR_BUS;
+		_delay_us(_delay);
+		_E(1);
+		_delay_us(_delay);
+		ret_val = LCD_B_IN & LCD_B_MSK;
+		_E(0);
+		_delay_us(_delay);
 	}
-	
+	else if (BUS_WIDTH == 4) {
+		LCD_B_DIR &= ~LCD_B_MSK;
+		_CLEAR_BUS;
+		_delay_us(_delay);
+		_E(1);
+	_delay_us(_delay);
+		ret_val = LCD_B_IN & LCD_B_MSK;
+		_E(0);
+		_delay_us(_delay);
+		_E(1);
+		_delay_us(_delay);
+		ret_val |= ((LCD_B_IN>>4) & ~(LCD_B_MSK));
+		_E(0);
+		_delay_us(_delay);
+	}
+	return ret_val;	
 }
-
-/* LCD write instruction*/
-void lcd_wr_ins(uint8_t ins_code)
+/* writes any data to LCD */
+void write(unsigned char val)
 {
-	lcd_busy();
-	LCD_RS(0);
-	lcd_wr(ins_code);
+	LCD_B_DIR |= LCD_B_MSK;
+	if ((BUS_WIDTH == 8) ||	(init_flag)) {
+		_CLEAR_BUS;
+		_delay_us(_delay);
+		_E(1);
+		if (BUS_WIDTH == 8)
+		LCD_B_OUT |=  ((((val & (1<<7))?(1):(0))<<LCD_D7 | \
+			 	((val & (1<<6))?(1):(0))<<LCD_D6 | \
+			 	((val & (1<<5))?(1):(0))<<LCD_D5 | \
+			 	((val & (1<<4))?(1):(0))<<LCD_D4 | \
+			 	((val & (1<<3))?(1):(0))<<LCD_D3 | \
+			 	((val & (1<<2))?(1):(0))<<LCD_D2 | \
+			 	((val & (1<<1))?(1):(0))<<LCD_D1 | \
+			 	((val & (1<<0))?(1):(0))<<LCD_D0) & LCD_B_MSK);
+		else if (BUS_WIDTH == 4)
+		LCD_B_OUT |=  ((((val & (1<<7))?(1):(0))<<LCD_D7 | \
+			 	((val & (1<<6))?(1):(0))<<LCD_D6 | \
+			 	((val & (1<<5))?(1):(0))<<LCD_D5 | \
+			 	((val & (1<<4))?(1):(0))<<LCD_D4 ) & LCD_B_MSK);
+
+
+		_delay_us(_delay);
+		_E(0);
+		_delay_us(_delay);
+	}
+	else if (BUS_WIDTH == 4) {
+		_CLEAR_BUS;
+		_delay_us(_delay);
+		_E(1);
+		LCD_B_OUT |=  ((((val & (1<<7))?(1):(0))<<LCD_D7 | \
+			 	((val & (1<<6))?(1):(0))<<LCD_D6 | \
+			 	((val & (1<<5))?(1):(0))<<LCD_D5 | \
+			 	((val & (1<<4))?(1):(0))<<LCD_D4) & LCD_B_MSK);
+
+		_delay_us(_delay);
+		_E(0);
+		_delay_us(_delay);
+		_CLEAR_BUS;
+		_delay_us(_delay);
+		_E(1);
+		LCD_B_OUT |=  ((((val & (1<<3))?(1):(0))<<LCD_D7 | \
+			 	((val & (1<<2))?(1):(0))<<LCD_D6 | \
+			 	((val & (1<<1))?(1):(0))<<LCD_D5 | \
+			 	((val & (1<<0))?(1):(0))<<LCD_D4) & LCD_B_MSK);
+
+		_delay_us(_delay);
+		_E(0);
+		_delay_us(_delay);
+	}
 }
-/* LCD write data*/
-void lcd_wr_dt(uint8_t data)
+/* waits while LCD's controller is busy */
+void check_busy(void)
+{	
+	unsigned char res = 0x00;
+	_READ_BF;
+	do {
+		res = read();
+	} while (res & (1<<LCD_D7));
+}
+/* writes instruction to LCD */
+void wr_instr(unsigned char cmd)
 {
-	lcd_busy();
-	LCD_RS(1);
-	lcd_wr(data);
+	if (init_flag)
+		_delay_ms(5);
+	else
+		check_busy();
+	_WRITE_INS;
+	write(cmd);
 }
-/* LCD write init instruction */
-void lcd_wr_init_ins(uint8_t cmd)
+/* writes data (symbol) to LCD */
+void wr_symb(unsigned char symb)
 {
-	/* configure RS and RW bits */
-	LCD_RS(0);
-	LCD_RW(0);
-
-	P2OUT &= 0x00;	// clear data bus
-	__delay_ns(50);
-
-	LCD_E(1);	// enable operation
-	__delay_ns(1);
-	
-	P2OUT |= cmd;	// write data to bus
-	__delay_ns(100);
-
-	LCD_E(0);
-	__delay_ns(50);
-	__delay_ns(300);
+	_WRITE_DT;
+	write(symb);
 }
-/* LCD initialize */
+/* clears whole LCD and writes string to address*/
+void wr_scr(char *s, unsigned char ddram)
+{
+	wr_instr(_display_clear);
+	wr_instr(_set_ddram(ddram));
+	while (*s) {
+		wr_symb(*s++);
+	}
+}
+
+/* clears only line to be written and writes string to address*/
+void wr_str(char *s, unsigned char ddram)
+{
+	unsigned char i;
+	wr_instr(_set_ddram(ddram & 0xF0));
+	for (i = 0; i < 16; i++)
+		wr_symb(' ');
+	wr_instr(_set_ddram(ddram));
+	while (*s) {
+		wr_symb(*s++);
+	}
+}
+/* LCD initialization routine */
 void lcd_init(void)
 {
-	/* set port 2 as output */
-	P2DIR |= LCD_BUS_MASK;
-	/* start inintialization routine */
-	__delay_ms(50);
-	lcd_wr_init_ins(0x30);
-	__delay_ms(5);
-	lcd_wr_init_ins(0x30);
-	__delay_ms(5);
-	lcd_wr_init_ins(0x30);
-	__delay_ms(5);
-	lcd_wr_init_ins(0x20);
-	__delay_ms(5);
-	lcd_wr_init_ins(0x20);
-	lcd_wr_init_ins(0xC0);
-	__delay_ms(5);
-	lcd_wr_init_ins(0x00);
-	lcd_wr_init_ins(0xF0);
-	__delay_ms(5);
-	lcd_wr_init_ins(0x00);
-	lcd_wr_init_ins(0x10);
-	__delay_ms(5);
-	lcd_wr_init_ins(0x00);
-	lcd_wr_init_ins(0x20);
+	// GPIO initialization
+	LCD_B_DIR |= LCD_B_MSK;
+	LCD_C_DIR |= LCD_C_MSK;
 
+	LCD_B_OUT &= ~LCD_B_MSK;
+	LCD_C_OUT &= ~LCD_C_MSK;
 
-}
-/* LCD write string */
-void lcd_str(const char *str, uint8_t ddram_ptr)
-{
-	uint8_t symb = 0;
-	/* set DDRAM address to write from */
-	lcd_wr_ins(ddram_ptr | 0x80);
-	while (*str) {
-		symb = *str++;
-		lcd_wr_dt(symb);
+	LCD_B_SEL &= ~LCD_B_MSK;	
+	LCD_C_SEL &= ~LCD_C_MSK;
+	
+	LCD_B_SEL2 &= ~LCD_B_MSK;
+	LCD_C_SEL2 &= ~LCD_C_MSK;
+	// initialization routine
+	init_flag = 1;
+	_delay_ms(50);
+	wr_instr(_function_set_i);
+	_delay_ms(10);
+	wr_instr(_function_set_i);
+	_delay_us(150);
+	wr_instr(_function_set_i);
+	
+	_delay_ms(10);
+	wr_instr(_function_set);
+	_delay_ms(10);
+	init_flag = 0;
+// function set (if interface is 4-bit)
+	if (BUS_WIDTH == 4) {
+		wr_instr(_function_set);
 	}
-}
-/* clear LCD */
-void lcd_clr(void)
-{
-	lcd_wr_ins(0x01);
+// display off
+	wr_instr(_display_off);
+	_delay_ms(10);
+// display clear
+	wr_instr(_display_clear);
+	_delay_ms(10);
+// entry mode set
+	wr_instr(_entry_mode_set);
+	_delay_ms(10);
+// display on
+	wr_instr(_display_on);	
+	_delay_ms(10);
+// set ddram address
+	wr_instr(_set_ddram(0x00));	
+	_delay_ms(10);
 }

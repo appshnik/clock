@@ -5,7 +5,7 @@
 #include <msp430.h>
 
 /* constants definition */
-#define CPU_F		(1600000UL)		// oscilator frequency
+#define CPU_F		(16000000UL)		// oscilator frequency
 #define STR_LEN		(16)			// LCD string length
 #define MAIN_MD		(1)			// MAIN clock mode
 #define SEL_MD		(2)			// select clock mode
@@ -14,20 +14,21 @@
 
 /* IO definition */
 #define SET_B		(1<<0)			// "set" button
-#define UP_B		(1<<1)			// "set" button
-#define DOWN_B		(1<<2)			// "set" button
-#define NEXT_B		(1<<3)			// "set" button
+#define UP_B		(1<<1)			// "up" button
+#define DOWN_B		(1<<2)			// "down" button
+#define NEXT_B		(1<<3)			// "next" button
 
 /* event definition */
-#define SET		(~P2IN & SET_B)		// "set" button is pressed
-#define UP		(~P2IN & UP_B)		// "up" button is pressed
-#define DOWN		(~P2IN & DOWN_B)	// "down" button is pressed
-#define NEXT		(~P2IN & NEXT_B)	// "next" button is pressed
+#define SET		(~P1IN & SET_B)		// "set" button is pressed
+#define UP		(~P1IN & UP_B)		// "up" button is pressed
+#define DOWN		(~P1IN & DOWN_B)	// "down" button is pressed
+#define NEXT		(~P1IN & NEXT_B)	// "next" button is pressed
 
 /* function macroses */
-#define __delay_ms(ms)	__delay_cycles((CPU_F*ms)/1000UL)
-#define __delay_us(us)	__delay_cycles((CPU_F*us)/1000000UL)
-#define __delay_ns(ns)	__delay_cycles((CPU_F*ns)/1000000000UL)
+#define __delay_ms(ms)	(__delay_cycles((unsigned long)(CPU_F/1000UL * ms)))
+#define __delay_us(us)	(__delay_cycles((unsigned long)(CPU_F/1000000UL * us)))
+//#define __delay_us(us)	__delay_cycles(us/3 + us%3)
+#define __delay_ns(ns)	((ns) <= 50) ? __delay_cycles(1) : __delay_cycles(((ns)/50)+1)
 
 /* function prototipes */
 void init_device(void);
