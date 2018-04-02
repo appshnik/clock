@@ -2,10 +2,13 @@
 #define CLIB
 
 #include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 #include <msp430.h>
 
 /* constants definition */
-#define CPU_F		(16000000UL)		// oscilator frequency
+#define CPU_F		(20000000UL)		// oscilator frequency
+#define TA_FAC		(CPU_F/1000000UL)	// ticks per microsecond
 #define STR_LEN		(16)			// LCD string length
 #define MAIN_MD		(1)			// MAIN clock mode
 #define SEL_MD		(2)			// select clock mode

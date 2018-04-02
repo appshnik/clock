@@ -44,8 +44,13 @@
 					//	if LCD doesn't work properly - try
 					//	to increase this value
 
+#ifndef _delay_ms
 #define _delay_ms(ms)	(__delay_cycles((unsigned long)(CPU_F/1000UL * ms)))
+#endif
+
+#ifndef _delay_us
 #define _delay_us(us)	(__delay_cycles((unsigned long)(CPU_F/1000000UL * us)))
+#endif
 
 #define _function_set_i	(0x38)
 #define _function_set	(BUS_WIDTH == 8) ? (0x38) : (0x28)
