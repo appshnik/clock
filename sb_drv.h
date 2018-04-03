@@ -59,7 +59,7 @@ struct hutemp {
 
 void sb_start(void);
 uint8_t sb_resp(void);
-void sb_receive(void);
+signed char sb_receive(void);
 signed char sb_get_bit(void);
 signed char sb_read_data(void);
 

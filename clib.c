@@ -12,6 +12,7 @@ int c_mode;		// current clock mode
 extern uint8_t rec_oper;
 extern uint8_t bit_count;
 extern struct hutemp ht_data;
+extern uint16_t tar_val;
 
 /* desable WDT */
 void wdt_init(void)
@@ -78,11 +79,13 @@ void p2_isr(void)
 	if (P2IFG & SB_MSK) {
 		if (bit_count < 40) {
 			bit = sb_get_bit();
-//			sprintf(top_str, "%d", bit_count);
-//			wr_str(top_str, 0x00);
 		}
-		else
-			bit = -1;
+//		else
+//			bit = -1;
+
+		//hernya		
+		if (bit < 0 && bit_count == 0)
+			goto isr_end;
 
 		bit_count++;
 
@@ -98,17 +101,22 @@ void p2_isr(void)
 					wr_data(bit, &(ht_data.temp_h));				
 					break;
 				case 3	:
-					wr_data(bit, &(ht_data.temp_h));				
+					wr_data(bit, &(ht_data.temp_l));				
 					break;
 				case 4	:
 					wr_data(bit, &(ht_data.ch_sum));				
 					break;
 			}
 		}
-		else if ((bit_count >= 40) || (bit < 0)) {
+
+		if ((bit_count >= 40) || (bit < 0)) {
+			sprintf(top_str, "%d_%d", tar_val, bit_count);
+			wr_str(top_str, 0x00);
 			bit_count = 0;
 			rec_oper = 0;
+			SB_IE &= ~SB_MSK;
 		}
+isr_end:
 		P2IFG = P2IFG & ~SB_MSK;
 	}
 }

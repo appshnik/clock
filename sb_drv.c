@@ -5,6 +5,8 @@ struct hutemp ht_data;		// humidity and temperature data
 uint8_t rec_oper;		// data reading is active
 uint8_t bit_count;		// number of already received bits
 
+uint16_t tar_val;		// microseconds
+
 /* interrupt service routine for SB pin */
 /**
   * This ISR serves to calculate time periods of 1's and 0's
@@ -57,7 +59,7 @@ uint8_t sb_resp(void)
 	return res;
 }
 
-void sb_receive(void)
+signed char sb_receive(void)
 {
 	uint8_t itr;	// holder for previous interrupt settings
 	
@@ -70,13 +72,20 @@ void sb_receive(void)
 	// setup TimerA
 	//TODO
 	// wait while reading
-	while(rec_oper) {
-		;
-	}
+//	while(rec_oper) 
+//		;
+	__delay_ms(100);
+	
 	// restore interrupt settings
 	SB_IE = itr;
+	// data validation
+	if ((ht_data.hum_h + ht_data.hum_l + \
+		ht_data.temp_h + ht_data.temp_l) != ht_data.ch_sum)
+		return 2;
 	// calculate temp and humidity data
-	//TODO
+	ht_data.hum = (((unsigned int)ht_data.hum_h)<<8 | ht_data.hum_l) & 0x7FFF;
+	ht_data.temp = (((unsigned int)ht_data.temp_h)<<8 | ht_data.temp_l) & 0x7FFF;
+	return 0;
 }
 
 /**
@@ -84,7 +93,6 @@ void sb_receive(void)
   */
 signed char sb_get_bit(void)
 {
-	uint16_t tar_val;
 	// set TimerA to zero
 	TACTL |= TACLR;
 	// wait until high-low transition
@@ -103,7 +111,7 @@ signed char sb_read_data(void)
 {
 	sb_start();
 	if (sb_resp())
-		sb_receive();
-	
-	return 0;
+		return sb_receive();
+	else
+		return 1;
 }

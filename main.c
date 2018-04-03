@@ -13,7 +13,7 @@ extern char bot_str[17];
 
 int main(void)
 {
-	unsigned int humid = 0;
+	signed char ht_res;
 	/* initialization */
 	init_device();
 	lcd_init();
@@ -21,15 +21,18 @@ int main(void)
 	P1DIR |= (1<<6) | (1<<0);
 	/* main program loop */
 	while (1) {
-		__delay_ms(50UL);
-		sb_read_data();
-//		ht_data.hum_h = 0x02;
-//		ht_data.hum_l = 0xB7;
-		humid = ((unsigned int)ht_data.hum_h << 8) | ht_data.hum_l;
-		__delay_ms(100UL);
-		sprintf(bot_str, "%d.%d", humid/10, humid%10);
-		wr_str(bot_str, 0x40);
-		while (1);
+		__delay_ms(2500UL);
+		ht_res = sb_read_data();
+		if (ht_res == 1)
+			wr_str("Sensor error", 0x42);
+		else if (ht_res == 2)
+			wr_str("Wrong data", 0x43);
+		else {
+			sprintf(bot_str, "%d.%d_%d.%d", ht_data.hum/10, ht_data.hum%10, \
+							ht_data.temp/10, ht_data.temp%10);
+			wr_str(bot_str, 0x40);
+		}
+//		while (1);
 
 //		wr_str("time", 0x46);
 //		__delay_ms(1500UL);
