@@ -1,0 +1,9 @@
+# ignore datasheets
+*.pdf
+# ignore binary files
+*.out
+*.fwr
+# ignore /hex 
+**/hex
+# ignore junk files
+pain.c
