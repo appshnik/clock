@@ -18,9 +18,9 @@
 /*********************************************************************/
 
 #define MAX_RESP_TIME	32000
-#define ONE_MIN_TIME	68	// us
+#define ONE_MIN_TIME	65	// us
 #define ONE_MAX_TIME	75	// us
-#define ZERO_MIN_TIME	22	// us
+#define ZERO_MIN_TIME	20	// us
 #define ZERO_MAX_TIME	30	// us
 
 

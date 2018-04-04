@@ -24,6 +24,6 @@ hex: $(DEPS)
 	msp430-objcopy -O ihex $(OUTELF) $(OUTHEX)
 	cp -r hex/ /home/share/
 
-load: $(OUT)
+flash: $(OUT)
 	$(MCUDBG) $(DRV) "prog $(OUTBIN)"
 

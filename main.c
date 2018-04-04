@@ -8,8 +8,8 @@
 
 extern struct hutemp ht_data;
 extern int c_mode;
-extern char top_str[17];
-extern char bot_str[17];
+extern char top_str[STR_LEN];
+extern char bot_str[STR_LEN];
 
 int main(void)
 {
@@ -18,7 +18,6 @@ int main(void)
 	init_device();
 	lcd_init();
 	wr_scr("kitchen clock", 0x01);
-	P1DIR |= (1<<6) | (1<<0);
 	/* main program loop */
 	while (1) {
 		__delay_ms(2500UL);

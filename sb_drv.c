@@ -80,10 +80,10 @@ signed char sb_receive(void)
 	// restore interrupt settings
 	SB_IE = itr;
 	// data validation
-/*	if ((ht_data.hum_h + ht_data.hum_l + \
+	if ((ht_data.hum_h + ht_data.hum_l + \
 		ht_data.temp_h + ht_data.temp_l) != ht_data.ch_sum)
 		return ++failed;
-*/	// calculate temp and humidity data
+	// calculate temp and humidity data
 	ht_data.hum = (((unsigned int)ht_data.hum_h)<<8 | ht_data.hum_l) & 0x7FFF;
 	ht_data.temp = (((unsigned int)ht_data.temp_h)<<8 | ht_data.temp_l) & 0x7FFF;
 	return (failed = 0);
