@@ -62,6 +62,7 @@ uint8_t sb_resp(void)
 signed char sb_receive(void)
 {
 	uint8_t itr;	// holder for previous interrupt settings
+	static uint8_t failed;
 	
 	itr = SB_IE;
 	rec_oper = 1;
@@ -79,13 +80,13 @@ signed char sb_receive(void)
 	// restore interrupt settings
 	SB_IE = itr;
 	// data validation
-	if ((ht_data.hum_h + ht_data.hum_l + \
+/*	if ((ht_data.hum_h + ht_data.hum_l + \
 		ht_data.temp_h + ht_data.temp_l) != ht_data.ch_sum)
-		return 2;
-	// calculate temp and humidity data
+		return ++failed;
+*/	// calculate temp and humidity data
 	ht_data.hum = (((unsigned int)ht_data.hum_h)<<8 | ht_data.hum_l) & 0x7FFF;
 	ht_data.temp = (((unsigned int)ht_data.temp_h)<<8 | ht_data.temp_l) & 0x7FFF;
-	return 0;
+	return (failed = 0);
 }
 
 /**
@@ -113,5 +114,5 @@ signed char sb_read_data(void)
 	if (sb_resp())
 		return sb_receive();
 	else
-		return 1;
+		return -1;
 }

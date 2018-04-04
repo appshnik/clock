@@ -23,13 +23,12 @@ int main(void)
 	while (1) {
 		__delay_ms(2500UL);
 		ht_res = sb_read_data();
-		if (ht_res == 1)
+		if (ht_res == -1)
 			wr_str("Sensor error", 0x42);
-		else if (ht_res == 2)
-			wr_str("Wrong data", 0x43);
 		else {
-			sprintf(bot_str, "%d.%d_%d.%d", ht_data.hum/10, ht_data.hum%10, \
-							ht_data.temp/10, ht_data.temp%10);
+			sprintf(bot_str, "%d.%d_%d.%d_%d", ht_data.hum/10, ht_data.hum%10, \
+							ht_data.temp/10, ht_data.temp%10, \
+							ht_res);
 			wr_str(bot_str, 0x40);
 		}
 //		while (1);
