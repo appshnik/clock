@@ -1,9 +1,11 @@
 # ignore datasheets
 *.pdf
 # ignore binary files
-*.out
-*.fwr
-# ignore /hex 
+*.o
+*.lst
+*.hex
+# ignore dependency files
+*.d
+*.swp
+# ignore /hex
 **/hex
-# ignore junk files
-pain.c
