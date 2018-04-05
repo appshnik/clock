@@ -13,7 +13,7 @@ OUTHEX		= ./hex/clock.hex
 MCUDBG		= mspdebug
 DRV		= rf2500
 
-.PHONY: default hex load
+.PHONY: default hex flash
 
 default: $(DEPS)
 	$(CC) $(MMCU) -o $(OUTBIN) $(SRC) $(CFLAGS)
