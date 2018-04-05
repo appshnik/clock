@@ -1,29 +1,43 @@
 CROSS_COMPILE	= msp430-
 CC		= $(CROSS_COMPILE)gcc
+LD		= $(CROSS_COMPILE)gcc
 MMCU		= -mmcu=msp430g2553
-CFLAGS		= -Wall -O2 -I.
-PSRC		= pain.c
-SRC		= clib.c main.c lcd_drv.c sb_drv.c
-HDR		= clib.h lcd_drv.h sb_drv.h
-DEPS 		= $(SRC) $(HDR)
-OUTBIN		= clock.fwr
-OUTELF		= ./hex/clock.elf
-OUTLST		= ./hex/clock.lst
-OUTHEX		= ./hex/clock.hex
+CCFLAGS		= -Wall -Os -Iinclude -MD
+LDFLAGS		= -Wall
+SRC_FOL		= src/
+
+OBJS		= clib.o \
+		  main.o \
+		  lcd_drv.o \
+		  sb_drv.o
+
+OUTELF		= clock.elf
+OUTLST		= clock.lst
+OUTHEX		= clock.hex
 MCUDBG		= mspdebug
 DRV		= rf2500
 
-.PHONY: default hex flash
+.PHONY: default flash clean distclean
 
-default: $(DEPS)
-	$(CC) $(MMCU) -o $(OUTBIN) $(SRC) $(CFLAGS)
+%.o: $(SRC_FOL)%.c
+	@echo [CC] $<
+	@$(CC) -c $< $(MMCU) -o $@ $(CCFLAGS)
 
-hex: $(DEPS)
-	$(CC) -C $(MMCU) -o $(OUTELF) $(SRC)
+default: $(OBJS)
+	@echo [LD] $(OUTELF)
+	@$(LD) $(MMCU) -o $(OUTELF) $^ $(LDFLAGS)
 	msp430-objdump -DS $(OUTELF) > $(OUTLST)
 	msp430-objcopy -O ihex $(OUTELF) $(OUTHEX)
-	cp -r hex/ /home/share/
+	cp $(OUTELF) $(OUTLST) $(OUTHEX) /home/share/
 
-flash: $(OUT)
-	$(MCUDBG) $(DRV) "prog $(OUTBIN)"
+flash: $(OUTELF)
+	$(MCUDBG) $(DRV) "prog $(OUTELF)"
+
+clean:
+	rm -rf $(OUTELF) $(OUTLST) $(OUTHEX) *.d *.o
+
+distclean:
+	make clean
+
+-include $(OBJS:.o=.d)
 
