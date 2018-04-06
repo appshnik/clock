@@ -1,7 +1,9 @@
 # clock
 kitchen clock project
 
-This project is made for small kitchen clock design. Main purpose of kitchen clock is to show user a curent time (and temperature) and let him to set a timer that reports user when the time expired.
+This project is made for small kitchen clock design. Main purpose of kitchen
+clock is to show user a current time (and temperature) and let him to set
+a timer that reports user when the time expired.
 
 Device consists of:
 	1) MSP430G2553 controller;
@@ -23,6 +25,6 @@ main loop -		mode control
 			read from TS
 			check if timer has expired
 
-interrupts -		timer isr (for changing device mode)
+interrupts -		timer ISR (for changing device mode)
 			GPIO isr (for keyboard events)
 

@@ -14,7 +14,7 @@ extern uint8_t bit_count;
 extern struct hutemp ht_data;
 extern uint16_t tar_val;
 
-/* desable WDT */
+/* disable WDT */
 void wdt_init(void)
 {
 	WDTCTL = WDTPW | WDTHOLD;
@@ -36,7 +36,7 @@ void ta_init(void)
 	TACTL |= MC_2;
 }
 
-/* variables init */
+/* variables initialization */
 /* TODO */
 /* MCLK init as 20 MHz*/
 void mclk_init(void)
@@ -47,7 +47,7 @@ void mclk_init(void)
 //	BCSCTL1 = BCSCTL1 | 0x07;	/* RSELx = 7 */
 
 }
-/* initializaton routine */
+/* initialization routine */
 void init_device(void)
 {
 	__enable_interrupt();
@@ -76,7 +76,7 @@ void p2_isr(void)
 	if (P2IFG & SB_MSK) {
 		bit = sb_get_bit();
 
-		/* ignore first short impusle from sensor */
+		/* ignore first short impulse from sensor */
 		if (bit < 0 && bit_count == 0)
 			goto isr_end;
 

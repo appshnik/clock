@@ -19,9 +19,9 @@ uint16_t tar_val;		// microseconds
 /* main idea */
 /**
   * User's function initiates data reading through single-bus interface.
-  * After start signal it desables any interrupts on this port and enables
+  * After start signal it disables any interrupts on this port and enables
   * the one that belongs to desired port pin. Function starts a cycle which is
-  * to be perfomed while data transfer isn't finished (some flag is switched).
+  * to be performed while data transfer isn't finished (some flag is switched).
   * Then interrupts settings are restored (all data receiving/storing work is
   * implemented in ISR).
   */
@@ -111,7 +111,7 @@ signed char sb_read_data(void)
 {
 	/* send start signal to sensor */
 	sb_start();
-	/* check if sensor has responsed */
+	/* check if sensor has responded */
 	if (sb_resp())
 		/* start bit reading sequence */
 		return sb_receive();

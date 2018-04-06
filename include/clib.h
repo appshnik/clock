@@ -7,7 +7,7 @@
 #include <msp430.h>
 
 /* constants definition */
-#define CPU_F		(20000000UL)		/* oscilator frequency */
+#define CPU_F		(20000000UL)		/* oscillator frequency */
 #define TA_FAC		(CPU_F/1000000UL)	/* ticks per microsecond */
 #define STR_LEN		(17)			/* LCD string length */
 #define MAIN_MD		(1)			/* MAIN clock mode */
@@ -27,12 +27,12 @@
 #define DOWN		(~P1IN & DOWN_B)	/* "down" button is pressed */
 #define NEXT		(~P1IN & NEXT_B)	/* "next" button is pressed */
 
-/* function macroses */
+/* function macros */
 #define __delay_ms(ms)	(__delay_cycles((unsigned long)(CPU_F/1000UL * ms)))
 #define __delay_us(us)	(__delay_cycles((unsigned long)(CPU_F/1000000UL * us)))
 #define __delay_ns(ns)	((ns) <= 50) ? __delay_cycles(1) : __delay_cycles(((ns)/50)+1)
 
-/* function prototipes */
+/* function prototypes */
 void init_device(void);
 
 /* Types */
