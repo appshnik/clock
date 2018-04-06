@@ -1,27 +1,30 @@
 #include <msp430.h>
-#include "clib.h"
+#include <clib.h>
+
+#ifndef SB_H
+#define SB_H
 
 #ifdef OUT
 #undef OUT
 #endif
 
 #ifndef CPU_F
-#define CPU_F		20000000UL	// MCLK frequency
+#define CPU_F		20000000UL	/* MCLK frequency */
 #endif
 
 
 /************** Single-bus pinout settings *************************************/
-#define SB_PRT		P2		// MCU's port for LCD's data bus
-#define SDA		3		// port pin for SDA
+#define SB_PRT		P2		/* MCU's port for LCD's data bus */
+#define SDA		3		/* port pin for SDA */
 
-#define SB_MSK     	(1<<SDA)	// port's pins for data bus
+#define SB_MSK     	(1<<SDA)	/* port's pins for data bus */
 /*********************************************************************/
 
 #define MAX_RESP_TIME	32000
-#define ONE_MIN_TIME	65	// us
-#define ONE_MAX_TIME	75	// us
-#define ZERO_MIN_TIME	20	// us
-#define ZERO_MAX_TIME	30	// us
+#define ONE_MIN_TIME	65	/* us */
+#define ONE_MAX_TIME	75	/* us */
+#define ZERO_MIN_TIME	20	/* us */
+#define ZERO_MAX_TIME	30	/* us */
 
 
 #ifndef _delay_ms
@@ -48,13 +51,13 @@
 #define _SB_STATE	(SB_IN & SB_MSK)
 
 struct hutemp {
-	uint8_t hum_h;		// humidity high byte
-	uint8_t hum_l;		// humidity low byte
-	uint8_t temp_h;		// temperature high byte
-	uint8_t temp_l;		// temperature low byte
-	uint8_t ch_sum;		// check sum
-	int hum;		// current humidity
-	int temp;		// current humidity
+	uint8_t hum_h;		/* humidity high byte */
+	uint8_t hum_l;		/* humidity low byte */
+	uint8_t temp_h;		/* temperature high byte */
+	uint8_t temp_l;		/* temperature low byte */
+	uint8_t ch_sum;		/* check sum */
+	int hum;		/* current humidity */
+	int temp;		/* current humidity */
 };
 
 void sb_start(void);
@@ -63,3 +66,4 @@ signed char sb_receive(void);
 signed char sb_get_bit(void);
 signed char sb_read_data(void);
 
+#endif /* SB_H */

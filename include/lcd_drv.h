@@ -1,8 +1,11 @@
 #include <msp430.h>
 
+#ifndef LCD_H
+#define LCD_H
+
 #ifdef OUT
 #undef OUT
-#endif 
+#endif
 
 #ifndef CPU_F
 #define CPU_F		16000000UL	// MCLK frequency
@@ -10,22 +13,22 @@
 
 
 /************** LCD pinout settings *************************************/
-#define BUS_WIDTH	4		// LCD's data bus width (8/4 bits)
-#define LCD_B_PRT	P2		// MCU's port for LCD's data bus
-#define LCD_C_PRT	P2		// MCU's port for LCD's control bits
+#define BUS_WIDTH	4		/* LCD's data bus width (8/4 bits) */
+#define LCD_B_PRT	P2		/* MCU's port for LCD's data bus */
+#define LCD_C_PRT	P2		/* MCU's port for LCD's control bits */
 
-#define LCD_D0		7		// port pin for D0 (set 7 if BUS_WIDTH == 4)
-#define LCD_D1		7		// port pin for D1 (set 7 if BUS_WIDTH == 4)
-#define LCD_D2		7		// port pin for D2 (set 7 if BUS_WIDTH == 4)
-#define LCD_D3		7		// port pin for D3 (set 7 if BUS_WIDTH == 4)
-#define LCD_D4		4		// port pin for D4
-#define LCD_D5		5		// port pin for D5
-#define LCD_D6		6		// port pin for D6
-#define LCD_D7		7		// port pin for D7
+#define LCD_D0		7		/* port pin for D0 (set 7 if BUS_WIDTH == 4) */
+#define LCD_D1		7		/* port pin for D1 (set 7 if BUS_WIDTH == 4) */
+#define LCD_D2		7		/* port pin for D2 (set 7 if BUS_WIDTH == 4) */
+#define LCD_D3		7		/* port pin for D3 (set 7 if BUS_WIDTH == 4) */
+#define LCD_D4		4		/* port pin for D4 */
+#define LCD_D5		5		/* port pin for D5 */
+#define LCD_D6		6		/* port pin for D6 */
+#define LCD_D7		7		/* port pin for D7 */
 
-#define LCD_RS		0		// port pin for RS
-#define LCD_RW		1		// port pin for RW
-#define LCD_E		2		// port pin for E
+#define LCD_RS		0		/* port pin for RS */
+#define LCD_RW		1		/* port pin for RW */
+#define LCD_E		2		/* port pin for E */
 
 #define LCD_B_MSK      (1<<LCD_D0 | \
 			1<<LCD_D1 | \
@@ -34,15 +37,15 @@
 			1<<LCD_D4 | \
 			1<<LCD_D5 | \
 			1<<LCD_D6 | \
-			1<<LCD_D7)	// port's pins for data bus
+			1<<LCD_D7)	/* port's pins for data bus */
 
 #define LCD_C_MSK      (1<<LCD_RS | \
 			1<<LCD_RW | \
-			1<<LCD_E)	// port's pins for control bits
+			1<<LCD_E)	/* port's pins for control bits */
 /*********************************************************************/
-#define _delay		15		// us, delay for read/write routine timings
-					//	if LCD doesn't work properly - try
-					//	to increase this value
+#define _delay		15		/* us, delay for read/write routine timings
+						if LCD doesn't work properly - try
+						to increase this value */
 
 #ifndef _delay_ms
 #define _delay_ms(ms)	(__delay_cycles((unsigned long)(CPU_F/1000UL * ms)))
@@ -91,3 +94,5 @@ void wr_symb(unsigned char symb);
 void wr_scr(char *s, unsigned char ddram);
 void wr_str(char *s, unsigned char ddram);
 void lcd_init(void);
+
+#endif /* LCD_H */
