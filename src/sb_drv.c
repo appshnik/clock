@@ -1,9 +1,9 @@
 #include <sb_drv.h>
 #include <stdint.h>
 
-struct hutemp ht_data;		// humidity and temperature data
-uint8_t rec_oper;		// data reading is active
-uint8_t bit_count;		// number of already received bits
+struct hutemp ht_data;		/* humidity and temperature data */
+uint8_t rec_oper;		/* data reading is active */
+uint8_t bit_count;		/* number of already received bits */
 
 uint16_t tar_val;		// microseconds
 
@@ -61,31 +61,29 @@ uint8_t sb_resp(void)
 
 signed char sb_receive(void)
 {
-	uint8_t itr;	// holder for previous interrupt settings
+	uint8_t itr;	/* holder for previous interrupt settings */
 	static uint8_t failed;
 
 	itr = SB_IE;
 	rec_oper = 1;
 	bit_count = 0;
 
-	// enable sufficient interrupt
+	/* enable sufficient interrupt */
 	SB_IE = SB_MSK;
-	// setup TimerA
-	//TODO
-	// wait while reading
-//	while(rec_oper)
-//		;
+	/* setup TimerA */
+	/* TODO */
+	/* wait while reading */
 	__delay_ms(100);
 
-	// restore interrupt settings
+	/* restore interrupt settings */
 	SB_IE = itr;
-	// data validation
+	/* data validation */
 	if ((ht_data.hum_h + ht_data.hum_l + \
 		ht_data.temp_h + ht_data.temp_l) != ht_data.ch_sum)
 		return ++failed;
-	// calculate temp and humidity data
-	ht_data.hum = (((unsigned int)ht_data.hum_h)<<8 | ht_data.hum_l) & 0x7FFF;
-	ht_data.temp = (((unsigned int)ht_data.temp_h)<<8 | ht_data.temp_l) & 0x7FFF;
+	/* calculate temp and humidity data */
+	ht_data.hum = ((ht_data.hum_h)<<8 | ht_data.hum_l) & 0x7FFF;
+	ht_data.temp = ((ht_data.temp_h)<<8 | ht_data.temp_l) & 0x7FFF;
 	return (failed = 0);
 }
 
@@ -94,11 +92,11 @@ signed char sb_receive(void)
   */
 signed char sb_get_bit(void)
 {
-	// set TimerA to zero
+	/* set TimerA to zero */
 	TACTL |= TACLR;
-	// wait until high-low transition
+	/* wait until high-low transition */
 	while (SB_IN & SB_MSK);
-	// compare TAR with predefined values and return corresponding value
+	/* compare TAR with predefined values and return corresponding value */
 	tar_val = (unsigned int)(TAR) / TA_FAC;
 	if ( tar_val >= ONE_MIN_TIME && tar_val <= ONE_MAX_TIME)
 		return 1;
@@ -108,10 +106,14 @@ signed char sb_get_bit(void)
 		return -1;
 }
 
+/* Data receiving routine */
 signed char sb_read_data(void)
 {
+	/* send start signal to sensor */
 	sb_start();
+	/* check if sensor has responsed */
 	if (sb_resp())
+		/* start bit reading sequence */
 		return sb_receive();
 	else
 		return -1;

@@ -1,7 +1,7 @@
 #include <lcd_drv.h>
 
 #ifndef CPU_F
-#define CPU_F		16000000UL	// MCLK frequency
+#define CPU_F		16000000UL	/* MCLK frequency */
 #endif
 /* LCD initialization routine indicator */
 unsigned char init_flag;
@@ -140,7 +140,7 @@ void wr_str(char *s, unsigned char ddram)
 /* LCD initialization routine */
 void lcd_init(void)
 {
-	// GPIO initialization
+	/* GPIO initialization */
 	LCD_B_DIR |= LCD_B_MSK;
 	LCD_C_DIR |= LCD_C_MSK;
 
@@ -152,7 +152,7 @@ void lcd_init(void)
 
 	LCD_B_SEL2 &= ~LCD_B_MSK;
 	LCD_C_SEL2 &= ~LCD_C_MSK;
-	// initialization routine
+	/* initialization routine */
 	init_flag = 1;
 	_delay_ms(50);
 	wr_instr(_function_set_i);
@@ -165,23 +165,23 @@ void lcd_init(void)
 	wr_instr(_function_set);
 	_delay_ms(10);
 	init_flag = 0;
-// function set (if interface is 4-bit)
+	/* function set (if interface is 4-bit) */
 	if (BUS_WIDTH == 4) {
 		wr_instr(_function_set);
 	}
-// display off
+	/* display off */
 	wr_instr(_display_off);
 	_delay_ms(10);
-// display clear
+	/* display clear */
 	wr_instr(_display_clear);
 	_delay_ms(10);
-// entry mode set
+	/* entry mode set */
 	wr_instr(_entry_mode_set);
 	_delay_ms(10);
-// display on
+	/* display on */
 	wr_instr(_display_on);
 	_delay_ms(10);
-// set ddram address
+	/* set ddram address */
 	wr_instr(_set_ddram(0x00));
 	_delay_ms(10);
 }

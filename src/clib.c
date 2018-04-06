@@ -4,9 +4,9 @@
 
 
 /* global variables */
-char top_str[STR_LEN];	// top string of LCD
-char bot_str[STR_LEN];	// bottom string of LCD
-int c_mode;		// current clock mode
+char top_str[STR_LEN];	/* top string of LCD */
+char bot_str[STR_LEN];	/* bottom string of LCD */
+int c_mode;		/* current clock mode */
 
 /* external variables */
 extern uint8_t rec_oper;
@@ -37,14 +37,14 @@ void ta_init(void)
 }
 
 /* variables init */
-//TODO
+/* TODO */
 /* MCLK init as 20 MHz*/
 void mclk_init(void)
 {
-	DCOCTL = 0xE0;			// DCOx = 7	20 MHz
-	BCSCTL1 = BCSCTL1 | 0x0F;	// RSELx = 15
-//	DCOCTL = 0x60;			// DCOx = 3	1 MHz
-//	BCSCTL1 = BCSCTL1 | 0x07;	// RSELx = 7
+	DCOCTL = 0xE0;			/* DCOx = 7	20 MHz */
+	BCSCTL1 = BCSCTL1 | 0x0F;	// RSELx = 15 */
+//	DCOCTL = 0x60;			/* DCOx = 3	1 MHz */
+//	BCSCTL1 = BCSCTL1 | 0x07;	/* RSELx = 7 */
 
 }
 /* initializaton routine */
@@ -55,7 +55,6 @@ void init_device(void)
 	mclk_init();
 	gpio_init();
 	ta_init();
-	//var_init();
 }
 
 void wr_data(signed char bit, uint8_t *byte) {
@@ -77,7 +76,7 @@ void p2_isr(void)
 	if (P2IFG & SB_MSK) {
 		bit = sb_get_bit();
 
-		// avoid first short impusle from sensor
+		/* ignore first short impusle from sensor */
 		if (bit < 0 && bit_count == 0)
 			goto isr_end;
 
