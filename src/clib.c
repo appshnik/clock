@@ -41,10 +41,10 @@ void ta_init(void)
 /* MCLK init as 20 MHz*/
 void mclk_init(void)
 {
-	DCOCTL = 0xE0;			/* DCOx = 7	20 MHz */
-	BCSCTL1 = BCSCTL1 | 0x0F;	// RSELx = 15 */
-//	DCOCTL = 0x60;			/* DCOx = 3	1 MHz */
-//	BCSCTL1 = BCSCTL1 | 0x07;	/* RSELx = 7 */
+	DCOCTL = 0xE0;			/* DCOx = 7	CPU_F ~ 20 MHz */
+	BCSCTL1 = BCSCTL1 | 0x0F;	/* RSELx = 15 */
+/*	DCOCTL = 0x60;			// DCOx = 3	CPU_F ~ 1 MHz
+	BCSCTL1 = BCSCTL1 | 0x07;	// RSELx = 7 */
 
 }
 /* initialization routine */
@@ -57,12 +57,14 @@ void init_device(void)
 	ta_init();
 }
 
-void wr_data(signed char bit, uint8_t *byte) {
+/* write next less significant bit */
+void wr_data(signed char bit, uint8_t *byte)
+{
 	if (bit)
 		*byte |= 1;
 	else
 		*byte &= ~1;
-
+	/* shift byte for next writing */
 	if (bit_count % 8 < 7)
 		*byte = *byte << 1;
 }
@@ -75,13 +77,9 @@ void p2_isr(void)
 	signed char bit;
 	if (P2IFG & SB_MSK) {
 		bit = sb_get_bit();
-
 		/* ignore first short impulse from sensor */
 		if (bit < 0 && bit_count == 0)
-			goto isr_end;
-
-		bit_count++;
-
+		goto isr_end;
 		if ((bit >= 0)) {
 			switch(bit_count / 8) {
 			case 0	:
@@ -101,15 +99,16 @@ void p2_isr(void)
 				break;
 			}
 		}
-
+		bit_count++;
 		if ((bit_count >= 40) || (bit < 0)) {
+			/* temporary string for debugging purposes */
 			sprintf(top_str, "%d_%d", tar_val, bit_count);
 			wr_str(top_str, 0x00);
 			bit_count = 0;
 			rec_oper = 0;
 			SB_IE &= ~SB_MSK;
 		}
-isr_end:
+	isr_end:
 		P2IFG = P2IFG & ~SB_MSK;
 	}
 }

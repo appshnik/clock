@@ -2,9 +2,6 @@
 #include <lcd_drv.h>
 #include <sb_drv.h>
 
-#define SET_GREEN	P1OUT |= (1<<6)
-#define SET_RED		P1OUT |= (1<<0)
-#define RESET_GREEN	P1OUT &= ~(1<<6)
 
 extern struct hutemp ht_data;
 extern int c_mode;
@@ -25,9 +22,10 @@ int main(void)
 		if (ht_res == -1)
 			wr_str("Sensor error", 0x42);
 		else {
-			sprintf(bot_str, "%d.%d_%d.%d_%d", ht_data.hum/10, ht_data.hum%10, \
-							ht_data.temp/10, ht_data.temp%10, \
-							ht_res);
+			sprintf(bot_str, "%d.%d_%d.%d_%d_%d", \
+				ht_data.hum/10, ht_data.hum%10, \
+				ht_data.temp/10, ht_data.temp%10, \
+				ht_data.ch_sum, ht_res);
 			wr_str(bot_str, 0x40);
 		}
 	}

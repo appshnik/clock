@@ -2,7 +2,7 @@ CROSS_COMPILE	= msp430-
 CC		= $(CROSS_COMPILE)gcc
 LD		= $(CROSS_COMPILE)gcc
 MMCU		= -mmcu=msp430g2553
-CCFLAGS		= -Wall -Os -Iinclude -MD
+CCFLAGS		= -Wall -Os -Iinclude -MD -pedantic -ansi -Werror -Wextra
 LDFLAGS		= -Wall
 SRC_FOL		= src/
 
@@ -17,7 +17,7 @@ OUTHEX		= clock.hex
 MCUDBG		= mspdebug
 DRV		= rf2500
 
-.PHONY: default flash clean distclean
+.PHONY: default flash clean distclean ctags
 
 %.o: $(SRC_FOL)%.c
 	@echo [CC] $<
@@ -30,11 +30,14 @@ default: $(OBJS)
 	msp430-objcopy -O ihex $(OUTELF) $(OUTHEX)
 	cp $(OUTELF) $(OUTLST) $(OUTHEX) /home/share/
 
+ctags:
+	ctags $(SRC_FOL)*
+
 flash: $(OUTELF)
 	$(MCUDBG) $(DRV) "prog $(OUTELF)"
 
 clean:
-	rm -rf $(OUTELF) $(OUTLST) $(OUTHEX) *.d *.o
+	rm -rf $(OUTELF) $(OUTLST) $(OUTHEX) *.d *.o tags
 
 distclean:
 	make clean

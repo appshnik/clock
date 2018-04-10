@@ -8,7 +8,7 @@
 #endif
 
 #ifndef CPU_F
-#define CPU_F		16000000UL	// MCLK frequency
+#define CPU_F		16000000UL	/* MCLK frequency */
 #endif
 
 

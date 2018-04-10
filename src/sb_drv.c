@@ -5,7 +5,7 @@ struct hutemp ht_data;		/* humidity and temperature data */
 uint8_t rec_oper;		/* data reading is active */
 uint8_t bit_count;		/* number of already received bits */
 
-uint16_t tar_val;		// microseconds
+uint16_t tar_val;		/* microseconds */
 
 /* interrupt service routine for SB pin */
 /**
@@ -74,7 +74,6 @@ signed char sb_receive(void)
 	/* TODO */
 	/* wait while reading */
 	__delay_ms(100);
-
 	/* restore interrupt settings */
 	SB_IE = itr;
 	/* data validation */
