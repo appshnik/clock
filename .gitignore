@@ -1,4 +1,4 @@
-# ignore datasheets
+# ignore datasheet
 *.pdf
 # ignore binary files
 *.o
@@ -7,5 +7,5 @@
 # ignore dependency files
 *.d
 *.swp
-# ignore /hex
-**/hex
+# ignore ctags
+tags
