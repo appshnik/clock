@@ -79,7 +79,7 @@ void p2_isr(void)
 		bit = sb_get_bit();
 		/* ignore first short impulse from sensor */
 		if (bit < 0 && bit_count == 0)
-		goto isr_end;
+			goto isr_end;
 		if ((bit >= 0)) {
 			switch(bit_count / 8) {
 			case 0	:
