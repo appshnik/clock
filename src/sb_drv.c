@@ -76,16 +76,11 @@ signed char sb_receive(void)
 	__delay_ms(100);
 	/* restore interrupt settings */
 	SB_IE = itr;
+
 	/* data validation */
-	if ((ht_data.hum_h + ht_data.hum_l + \
-		ht_data.temp_h + ht_data.temp_l) != ht_data.ch_sum) {
-		ht_data.hum_h = 0x00;
-		ht_data.hum_l = 0x00;
-		ht_data.temp_h = 0x00;
-		ht_data.temp_l = 0x00;
-		ht_data.ch_sum = 0x00;
+	if (((uint8_t)(ht_data.hum_h + ht_data.hum_l + \
+		ht_data.temp_h + ht_data.temp_l)) != (uint8_t)ht_data.ch_sum)
 		return ++failed;
-	}
 	/* calculate temp and humidity data */
 	ht_data.hum = ((ht_data.hum_h)<<8 | ht_data.hum_l) & 0x7FFF;
 	ht_data.temp = ((ht_data.temp_h)<<8 | ht_data.temp_l) & 0x7FFF;
