@@ -63,6 +63,7 @@ signed char sb_receive(void)
 {
 	uint8_t itr;	/* holder for previous interrupt settings */
 	static uint8_t failed;
+	int8_t sign;
 
 	itr = SB_IE;
 	rec_oper = 1;
@@ -82,8 +83,9 @@ signed char sb_receive(void)
 		ht_data.temp_h + ht_data.temp_l)) != (uint8_t)ht_data.ch_sum)
 		return ++failed;
 	/* calculate temp and humidity data */
-	ht_data.hum = ((ht_data.hum_h)<<8 | ht_data.hum_l) & 0x7FFF;
-	ht_data.temp = ((ht_data.temp_h)<<8 | ht_data.temp_l) & 0x7FFF;
+	ht_data.hum = (ht_data.hum_h)<<8 | ht_data.hum_l;
+	sign = (ht_data.temp_h & 0x80) ? (-1) : (1);
+	ht_data.temp = sign * (((ht_data.temp_h)<<8 | ht_data.temp_l) & 0x7FFF);
 	return (failed = 0);
 }
 
