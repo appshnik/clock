@@ -30,9 +30,8 @@
 /* function macros */
 #define __delay_ms(ms)	(__delay_cycles((unsigned long)(CPU_F/1000UL * ms)))
 #define __delay_us(us)	(__delay_cycles((unsigned long)(CPU_F/1000000UL * us)))
-#define __delay_ns(ns)	((ns) <= 50) ? __delay_cycles(1) : __delay_cycles(((ns)/50)+1)
 
-/* function prototypes */
+/* function definitions */
 void init_device(void);
 
 /* Types */
@@ -50,5 +49,12 @@ struct dt {
 	struct date date;	/* date */
 	struct time time;	/* time */
 };
+
+/* external variables */
+extern struct hutemp ht_data;
+extern int c_mode;
+extern char top_str[STR_LEN];
+extern char bot_str[STR_LEN];
+
 
 #endif /* CLIB_H */

@@ -1,6 +1,6 @@
 #include <clib.h>
-#include <lcd_drv.h>
-#include <sb_drv.h>
+#include <lcd.h>
+#include <sb.h>
 
 
 /* global variables */
@@ -101,9 +101,6 @@ void p2_isr(void)
 		}
 		bit_count++;
 		if ((bit_count >= 40) || (bit < 0)) {
-			/* temporary string for debugging purposes */
-			sprintf(top_str, "%d_%d", tar_val, bit_count);
-			wr_str(top_str, 0x00);
 			bit_count = 0;
 			rec_oper = 0;
 			SB_IE &= ~SB_MSK;

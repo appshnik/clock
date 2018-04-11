@@ -4,6 +4,7 @@ DEFINES		= -D__STDC_VERSION__=199401L
 CROSS_COMPILE	= msp430-
 CC		= $(CROSS_COMPILE)gcc
 LD		= $(CROSS_COMPILE)gcc
+OBJ_DMP		= $(CROSS_COMPILE)objdump
 MCU		= msp430g2553
 MMCU		= -mmcu=$(MCU)
 
@@ -14,16 +15,13 @@ CFLAGS		+= $(DEFINES)
 
 LDFLAGS		= -Wall $(MMCU)
 
-SRC_FOL		= src/
-
-OBJS		= clib.o \
-		  main.o \
-		  lcd_drv.o \
-		  sb_drv.o
+OBJS		= src/clib.o \
+		  src/main.o \
+		  src/lcd.o \
+		  src/sb.o
 
 OUTELF		= clock.elf
 OUTLST		= clock.lst
-OUTHEX		= clock.hex
 MCUDBG		= mspdebug
 DRV		= rf2500
 
@@ -34,30 +32,29 @@ SPARSE_FLAGS	= -Wsparse-all $(MSP430_CFLAGS) $(CFLAGS)
 CPPCHECK_FLAGS	= --enable=all $(MSP430_CFLAGS) $(INCLUDES) $(DEFINES)
 CPPCHECK_FLAGS	+= -D__STDC__
 
-.PHONY: default flash clean distclean ctags
-
-%.o: $(SRC_FOL)%.c
-	@echo [CC] $<
-	@$(CC) -c $< $(MMCU) -o $@ $(CFLAGS)
-
 default: $(OBJS)
 	@echo [LD] $(OUTELF)
 	@$(LD) $(LDFLAGS) -o $(OUTELF) $^
-	$(CROSS_COMPILE)objdump -DS $(OUTELF) > $(OUTLST)
-	$(CROSS_COMPILE)objcopy -O ihex $(OUTELF) $(OUTHEX)
-	cp $(OUTELF) $(OUTLST) $(OUTHEX) /home/share/
+	@echo [OBJ_DMP] $(OUTLST)
+	@$(OBJ_DMP) -DS $(OUTELF) > $(OUTLST)
+
+%.o: %.c
+	@echo [CC] $<
+	@$(CC) -c $< $(MMCU) -o $@ $(CFLAGS)
 
 ctags:
-	ctags $(SRC_FOL)*
+	@ctags $(OBJS:.o=.c)
 
 flash: $(OUTELF)
 	$(MCUDBG) $(DRV) "prog $(OUTELF)"
 
 clean:
-	rm -rf $(OUTELF) $(OUTLST) $(OUTHEX) *.d *.o tags
+	@-rm -rf $(OUTELF) $(OUTLST) tags
+	@-rm -f $(OBJS)
+	@-rm -f $(OBJS:.o=.d)
 
 distclean:
-	make clean
+	@make clean
 
 _check_sparse:
 	@echo "---> Checking with sparse..."
@@ -80,6 +77,8 @@ _check_clang:
 	@echo
 
 check: _check_sparse _check_cppcheck _check_clang
+
+.PHONY: default flash clean distclean ctags
 
 -include $(OBJS:.o=.d)
 
