@@ -21,11 +21,12 @@ int main(void)
 		ht_res = sb_read_data();
 		if (ht_res == -1)
 			wr_str("Sensor error", 0x42);
+		else if (ht_res)
+			wr_str("Data error", 0x43);
 		else {
-			sprintf(bot_str, "%d.%d_%d.%d_%d_%d", \
+			sprintf(bot_str, "h:%d.%d__t:%d.%d", \
 				ht_data.hum/10, ht_data.hum%10, \
-				ht_data.temp/10, ht_data.temp%10, \
-				ht_data.ch_sum, ht_res);
+				ht_data.temp/10, ht_data.temp%10);
 			wr_str(bot_str, 0x40);
 		}
 	}
