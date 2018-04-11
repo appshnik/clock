@@ -7,11 +7,11 @@ a timer that reports user when the time expired.
 ## Hardware structure ##
 
 Device consists of:
-	1. MSP430G2553 controller;
-	2. RTC module;
-	3. LCD 16x2 module;
-	4. keyboard;
-	5. AM2302 humidity/temperature sensor.
+	1. MSP430G2553 controller
+	2. RTC module
+	3. LCD 16x2 module
+	4. keyboard
+	5. AM2302 humidity/temperature sensor
 
 ### MSP430 controller ###
 
@@ -40,6 +40,6 @@ Sensor description can be found [here][2]
 
 ## References ##
 
-[1] https://www.newhavendisplay.com/app_notes/SPLC780D.pdf
-[2] https://akizukidenshi.com/download/ds/aosong/AM2302.pdf
+[1]: https://www.newhavendisplay.com/app_notes/SPLC780D.pdf
+[2]: https://akizukidenshi.com/download/ds/aosong/AM2302.pdf
 
