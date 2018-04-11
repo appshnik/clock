@@ -71,6 +71,7 @@ void wr_data(signed char bit, uint8_t *byte)
 
 /* port 2 interrupt service routine */
 __attribute__((interrupt(PORT2_VECTOR)))
+/* cppcheck-suppress unusedFunction */
 void p2_isr(void)
 {
 	/* temperature and humidity data reading */

@@ -4,13 +4,14 @@
 
 int main(void)
 {
-	signed char ht_res;
+
 	/* initialization */
 	init_device();
 	lcd_init();
 	lcd_wr_scr("kitchen clock", 0x01);
 	/* main program loop */
 	while (1) {
+		signed char ht_res;
 		__delay_ms(2500UL);
 		ht_res = sb_read_data();
 		if (ht_res == -1)

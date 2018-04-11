@@ -30,7 +30,7 @@ MSP430_DEF	= -D__MSP430G2553__
 MSP430_CFLAGS	= $(MSP430_INC) $(MSP430_DEF)
 SPARSE_FLAGS	= -Wsparse-all $(MSP430_CFLAGS) $(CFLAGS)
 CPPCHECK_FLAGS	= --enable=all $(MSP430_CFLAGS) $(INCLUDES) $(DEFINES)
-CPPCHECK_FLAGS	+= -D__STDC__
+CPPCHECK_FLAGS	+= --inline-suppr -D__STDC__
 
 default: $(OBJS)
 	@echo [LD] $(OUTELF)
@@ -58,7 +58,7 @@ distclean:
 
 _check_sparse:
 	@echo "---> Checking with sparse..."
-	@find . -type f -name '*.[ch]' -exec sparse $(SPARSE_FLAGS) {} \;
+	@find . -type f -name '*.{c,h}' -exec sparse $(SPARSE_FLAGS) {} \;
 	@echo
 
 _check_cppcheck:
