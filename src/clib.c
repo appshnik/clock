@@ -6,7 +6,7 @@
 /* global variables */
 char top_str[STR_LEN];	/* top string of LCD */
 char bot_str[STR_LEN];	/* bottom string of LCD */
-int c_mode;		/* current clock mode */
+uint8_t c_scr;		/* current screen number */
 
 /* external variables */
 extern uint8_t rec_oper;
@@ -37,7 +37,11 @@ void ta_init(void)
 }
 
 /* variables initialization */
-/* TODO */
+void var_init(void)
+{
+	c_scr = 0;
+}
+
 /* MCLK init as 20 MHz*/
 void mclk_init(void)
 {
@@ -55,6 +59,7 @@ void init_device(void)
 	mclk_init();
 	gpio_init();
 	ta_init();
+	var_init();
 }
 
 /* write next less significant bit */

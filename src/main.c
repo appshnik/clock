@@ -19,9 +19,11 @@ int main(void)
 		else if (ht_res)
 			lcd_wr_str("Data error", 0x43);
 		else {
-			sprintf(bot_str, "h:%d.%d__t:%d.%d", \
-				ht_data.hum/10, ht_data.hum%10, \
-				ht_data.temp/10, ht_data.temp%10);
+			sprintf(top_str, " hum: %d.%d%%", \
+				ht_data.hum/10, ht_data.hum%10);
+			lcd_wr_str(top_str, 0x00);
+			sprintf(bot_str, "temp: %d.%d%cC", \
+				ht_data.temp/10, ht_data.temp%10, 0xDF);
 			lcd_wr_str(bot_str, 0x40);
 		}
 	}

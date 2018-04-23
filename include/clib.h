@@ -52,7 +52,7 @@ struct dt {
 
 /* external variables */
 extern struct hutemp ht_data;
-extern int c_mode;
+extern uint8_t c_scr;
 extern char top_str[STR_LEN];
 extern char bot_str[STR_LEN];
 
