@@ -9,6 +9,7 @@
 /* constants definition */
 #define CPU_F		(20000000UL)		/* oscillator frequency */
 #define TA_FAC		(CPU_F/1000000UL)	/* ticks per microsecond */
+#define TA_CNT		(615)			/* number of TA0 cycles ~2 sec*/
 #define STR_LEN		(17)			/* LCD string length */
 #define MAIN_MD		(1)			/* MAIN clock mode */
 #define SEL_MD		(2)			/* select clock mode */

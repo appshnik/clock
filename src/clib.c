@@ -11,8 +11,9 @@ uint8_t c_scr;		/* current screen number */
 /* external variables */
 extern uint8_t rec_oper;
 extern uint8_t bit_count;
-extern struct hutemp ht_data;
+/* extern struct hutemp ht_data; */
 extern uint16_t tar_val;
+/* extern signed char ht_res; */
 
 /* disable WDT */
 void wdt_init(void)
@@ -32,8 +33,9 @@ void gpio_init(void)
 /* Timer A initialization */
 void ta_init(void)
 {
-	TACTL = TASSEL_2;
-	TACTL |= MC_2;
+	TACTL = TASSEL_2;		/* SMCLK is used as clock source */
+	TACTL |= MC_2;			/* continuous mode */
+	TACTL |= TAIE;			/* enable interrupt request */
 }
 
 /* variables initialization */
@@ -108,11 +110,29 @@ void p2_isr(void)
 		bit_count++;
 		if ((bit_count >= 40) || (bit < 0)) {
 			bit_count = 0;
-			rec_oper = 0;
 			SB_IE &= ~SB_MSK;
 		}
 	isr_end:
 		P2IFG = P2IFG & ~SB_MSK;
+	}
+}
+
+/* TimerA interrupt service routine */
+__attribute__((interrupt(TIMER0_A1_VECTOR)))
+/* cppcheck-suppress unusedFunction */
+void ta0_isr(void)
+{
+	static int sb_wait_cnt;
+
+	TACTL = TACTL & ~TAIFG;
+	/* waiting for the time to read from HT sensor*/
+
+	if (sb_wait_cnt < TA_CNT) {
+		sb_wait_cnt += 1;
+	}
+	else {
+		sb_wait_cnt = 0;
+		sb_rec_oper = 1;
 	}
 }
 

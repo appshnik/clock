@@ -67,4 +67,9 @@ signed char sb_receive(void);
 signed char sb_get_bit(void);
 signed char sb_read_data(void);
 
+/* variables definitions*/
+extern struct hutemp ht_data;
+extern signed char ht_res;
+extern uint8_t sb_rec_oper;
+
 #endif /* SB_H */

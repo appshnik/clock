@@ -2,8 +2,11 @@
 #include <sb.h>
 
 struct hutemp ht_data;		/* humidity and temperature data */
-uint8_t rec_oper;		/* data reading is active */
+uint8_t sb_rec_oper;		/* data reading is active */
 uint8_t bit_count;		/* number of already received bits */
+signed char ht_res;		/* result of reading:	-1 - sensor error
+							>0 - wrong data
+							 0 - ok */
 
 uint16_t tar_val;		/* microseconds */
 
@@ -66,17 +69,17 @@ signed char sb_receive(void)
 	int8_t sign;		/* sign for temperature value */
 
 	itr = SB_IE;
-	rec_oper = 1;
+	sb_rec_oper = 0;
 	bit_count = 0;
 
 	/* enable sufficient interrupt */
+	TACTL = TACTL & ~TAIE;
 	SB_IE = SB_MSK;
-	/* setup TimerA */
-	/* TODO */
 	/* wait while reading */
 	_delay_ms(100);
 	/* restore interrupt settings */
 	SB_IE = itr;
+	TACTL = TACTL | TAIE;
 
 	/* data validation */
 	if (((uint8_t)(ht_data.hum_h + ht_data.hum_l + \
