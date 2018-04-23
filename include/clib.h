@@ -17,13 +17,17 @@
 #define T_SET_MD	(3)			/* timer SET mode */
 
 /* IO definition */
-#define SET_B		(1<<0)			/* "set" button */
+#define PREV_B		(1<<0)			/* "prev" button */
 #define UP_B		(1<<1)			/* "up" button */
 #define DOWN_B		(1<<2)			/* "down" button */
 #define NEXT_B		(1<<3)			/* "next" button */
+#define KEY_MSK		(PREV_B | \
+			UP_B | \
+			DOWN_B | \
+			NEXT_B)			/* keyboard mask */
 
 /* event definition */
-#define SET		(~P1IN & SET_B)		/* "set" button is pressed */
+#define PREV		(~P1IN & PREV_B)	/* "prev" button is pressed */
 #define UP		(~P1IN & UP_B)		/* "up" button is pressed */
 #define DOWN		(~P1IN & DOWN_B)	/* "down" button is pressed */
 #define NEXT		(~P1IN & NEXT_B)	/* "next" button is pressed */
@@ -54,6 +58,7 @@ struct dt {
 /* external variables */
 extern struct hutemp ht_data;
 extern uint8_t c_scr;
+extern uint8_t c_ind;
 extern char top_str[STR_LEN];
 extern char bot_str[STR_LEN];
 

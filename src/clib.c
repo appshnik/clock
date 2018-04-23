@@ -7,6 +7,7 @@
 char top_str[STR_LEN];	/* top string of LCD */
 char bot_str[STR_LEN];	/* bottom string of LCD */
 uint8_t c_scr;		/* current screen number */
+uint8_t c_ind;		/* current index */
 
 /* external variables */
 extern uint8_t rec_oper;
@@ -27,8 +28,15 @@ void gpio_init(void)
 	P2IES = 0x00;
 	P2IE = 0x00;
 
+	P1DIR = P1DIR & ~KEY_MSK;	/* set pins as inputs for buttons */
+	P1SEL = P1SEL & ~KEY_MSK;	/* disable pin multiplexing */
+	P1SEL2 = P1SEL2 & ~KEY_MSK;	/* disable pin multiplexing */
+	P1IES = P1IES | KEY_MSK;
+	P1IE = P1IE | KEY_MSK;
+
 	SB_SEL &= ~SB_MSK;
 	SB_SEL2 &= ~SB_MSK;
+
 }
 /* Timer A initialization */
 void ta_init(void)
@@ -87,7 +95,7 @@ void p2_isr(void)
 		bit = sb_get_bit();
 		/* ignore first short impulse from sensor */
 		if (bit < 0 && bit_count == 0)
-			goto isr_end;
+			goto p2_isr_end;
 		if ((bit >= 0)) {
 			switch(bit_count / 8) {
 			case 0	:
@@ -112,7 +120,7 @@ void p2_isr(void)
 			bit_count = 0;
 			SB_IE &= ~SB_MSK;
 		}
-	isr_end:
+	p2_isr_end:
 		P2IFG = P2IFG & ~SB_MSK;
 	}
 }
@@ -134,5 +142,71 @@ void ta0_isr(void)
 		sb_wait_cnt = 0;
 		sb_rec_oper = 1;
 	}
+}
+
+/* port 1 interrupt service routine */
+__attribute__((interrupt(PORT1_VECTOR)))
+/* cppcheck-suppress unusedFunction */
+void p1_isr(void)
+{
+	uint8_t max_ind;
+
+	max_ind = 4;		/* maximum index value in current screen */
+
+	__delay_ms(300);	/* to avoid bouncing */
+
+	/* this section avoids screen #1 due to it's absence */
+	if (((P1IFG & UP_B) || (P1IFG & DOWN_B)) && (c_scr == 0)) {
+		P1IFG = P1IFG & ~UP_B;
+		P1IFG = P1IFG & ~DOWN_B;
+		goto p1_isr_end;
+	}
+	/* screen navigation */
+	if (P1IFG & PREV_B) {
+		if (c_scr%2 == 0)
+			c_scr = (c_scr == 0)?(4):(c_scr - 2);
+		else {
+			if (c_ind == 0)
+				c_scr -= 1;
+			else
+				c_ind -= 1;
+		}
+		P1IFG = P1IFG & ~PREV_B;
+	}
+	else if (P1IFG & NEXT_B) {
+		if (c_scr%2 == 0)
+			c_scr = (c_scr == 4)?(0):(c_scr + 2);
+		else {
+			if (c_ind == max_ind)
+				c_scr -= 1;
+			else
+				c_ind += 1;
+		}
+		P1IFG = P1IFG & ~NEXT_B;
+	}
+	else if (P1IFG & UP_B) {
+		/* go to corresponding setup screen */
+		if (c_scr%2 == 0) {
+			c_scr += 1;
+			c_ind = 0;
+		}
+		else {
+			/*TODO*/;	/* increment parameter */
+		}
+		P1IFG = P1IFG & ~UP_B;
+	}
+	else if (P1IFG & DOWN_B) {
+		/* go to corresponding setup screen */
+		if (c_scr%2 == 0) {
+			c_scr += 1;
+			c_ind = 0;
+		}
+		else {
+			/*TODO*/;	/* decrement parameter */
+		}
+		P1IFG = P1IFG & ~DOWN_B;
+	}
+p1_isr_end:
+	;
 }
 
