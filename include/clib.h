@@ -50,6 +50,12 @@ struct time {
 	uint8_t mm;		/* minutes */
 	uint8_t ss; 		/* seconds */
 };
+struct timer {
+	uint8_t hh;		/* hours */
+	uint8_t mm;		/* minutes */
+	uint8_t ss; 		/* seconds */
+	uint8_t state;		/* timer state: on/off */
+};
 struct dt {
 	struct date date;	/* date */
 	struct time time;	/* time */
@@ -61,6 +67,9 @@ extern uint8_t c_scr;
 extern uint8_t c_ind;
 extern char top_str[STR_LEN];
 extern char bot_str[STR_LEN];
+extern struct time time;
+extern struct timer timer;
+extern struct date date;
 
 
 #endif /* CLIB_H */

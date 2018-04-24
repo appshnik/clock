@@ -8,6 +8,9 @@ char top_str[STR_LEN];	/* top string of LCD */
 char bot_str[STR_LEN];	/* bottom string of LCD */
 uint8_t c_scr;		/* current screen number */
 uint8_t c_ind;		/* current index */
+struct date date;	/* current date */
+struct time time;	/* current time */
+struct timer timer;	/* current timer values */
 
 /* external variables */
 extern uint8_t rec_oper;
