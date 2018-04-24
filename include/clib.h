@@ -42,13 +42,13 @@ void init_device(void);
 /* Types */
 struct date {
 	int yy;			/* year */
-	uint8_t mth;		/* month */
-	uint8_t dd;		/* day */
+	int mth;		/* month */
+	int dd;			/* day */
 };
 struct time {
-	uint8_t hh;		/* hours */
-	uint8_t mm;		/* minutes */
-	uint8_t ss; 		/* seconds */
+	int hh;			/* hours */
+	int mm;			/* minutes */
+	int ss; 		/* seconds */
 };
 struct timer {
 	uint8_t hh;		/* hours */

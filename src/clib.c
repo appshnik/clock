@@ -13,9 +13,14 @@ struct time time;	/* current time */
 struct timer timer;	/* current timer values */
 
 /* cursor position array for date/time setup screen */
-uint8_t dt_curs[] = {0x07, 0x0A, 0x0E, 0x47, 0x4A, 0x4D};
+uint8_t dt_curs[] = {0x07, 0x0A, 0x0F, 0x47, 0x4A, 0x4D};
 /* cursor position array for timer setup screen */
 uint8_t t_curs[] = {0x01, 0x04, 0x07, 0x47};
+
+/* array of pointers to  date/time parameters */
+int *dt_ptr[] = {&date.dd, &date.mth, &date.yy, &time.hh, &time.mm, &time.ss};
+/* array of pointers to  timer parameters */
+uint8_t *t_ptr[] = {&timer.hh, &timer.mm, &timer.ss, &timer.state};
 
 /* disable WDT */
 void wdt_init(void)
@@ -202,9 +207,13 @@ void p1_isr(void)
 			c_ind = 0;
 			lcd_wr_instr(_cursor_on);
 		}
-		else {
-			/*TODO*/;	/* increment parameter */
+		else if (c_scr == 3) {
+			*(dt_ptr[c_ind]) += 1;	/* increment parameter */
 		}
+		else if (c_scr == 5) {
+			*(t_ptr[c_ind]) += 1;	/* increment parameter */
+		}
+
 		P1IFG = P1IFG & ~UP_B;
 	}
 	else if (P1IFG & DOWN_B) {
@@ -214,8 +223,11 @@ void p1_isr(void)
 			c_ind = 0;
 			lcd_wr_instr(_cursor_on);
 		}
-		else {
-			/*TODO*/;	/* decrement parameter */
+		else if (c_scr == 3) {
+			*(dt_ptr[c_ind]) -= 1;	/* decrement parameter */
+		}
+		else if (c_scr == 5) {
+			*(t_ptr[c_ind]) -= 1;	/* decrement parameter */
 		}
 		P1IFG = P1IFG & ~DOWN_B;
 	}

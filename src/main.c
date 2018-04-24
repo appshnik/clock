@@ -44,7 +44,7 @@ int main(void)
 		case 2:
 			lcd_wr_str("current time", 0x03);
 			sprintf(bot_str, \
-				"%2d:%2d:%2d %2d/%2d", \
+				"%d:%d:%d  %d/%d", \
 				time.hh, time.mm, time.ss, \
 				date.dd, date.mth);
 			lcd_wr_str(bot_str, 0x40);
@@ -56,7 +56,7 @@ int main(void)
 				(timer.state)?("on"):("off"));
 			lcd_wr_str(top_str, 0x00);
 			sprintf(bot_str, \
-				"%2d:%2d:%2d left", \
+				"%d:%d:%d left", \
 				timer.hh, timer.mm, timer.ss);
 			lcd_wr_str(bot_str, 0x40);
 			break;
