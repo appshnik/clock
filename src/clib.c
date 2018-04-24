@@ -183,7 +183,7 @@ void p1_isr(void)
 	/* screen navigation */
 	if (P1IFG & PREV_B) {
 		if (c_scr%2 == 0)
-			c_scr = (c_scr == 0)?(4):(c_scr - 2);
+			c_scr = (c_scr == HT_SCR)?(T_SCR):(c_scr - 2);
 		else {
 			if (c_ind == 0) {
 				c_scr -= 1;
@@ -196,7 +196,7 @@ void p1_isr(void)
 	}
 	else if (P1IFG & NEXT_B) {
 		if (c_scr%2 == 0)
-			c_scr = (c_scr == 4)?(0):(c_scr + 2);
+			c_scr = (c_scr == T_SCR)?(HT_SCR):(c_scr + 2);
 		else {
 			if (c_ind == max_ind) {
 				c_scr -= 1;
@@ -214,11 +214,11 @@ void p1_isr(void)
 			c_ind = 0;
 			lcd_wr_instr(_cursor_on);
 		}
-		else if (c_scr == 3) {
+		else if (c_scr == DTS_SCR) {
 			*(dt_ptr[c_ind]) += 1;	/* increment parameter */
 			dt_ch = 1;
 		}
-		else if (c_scr == 5) {
+		else if (c_scr == TS_SCR) {
 			*(t_ptr[c_ind]) += 1;	/* increment parameter */
 			dt_ch = 2;
 		}
@@ -232,11 +232,11 @@ void p1_isr(void)
 			c_ind = 0;
 			lcd_wr_instr(_cursor_on);
 		}
-		else if (c_scr == 3) {
+		else if (c_scr == DTS_SCR) {
 			*(dt_ptr[c_ind]) -= 1;	/* decrement parameter */
 			dt_ch = 1;
 		}
-		else if (c_scr == 5) {
+		else if (c_scr == TS_SCR) {
 			*(t_ptr[c_ind]) -= 1;	/* decrement parameter */
 			dt_ch = 2;
 		}

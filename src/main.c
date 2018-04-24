@@ -24,7 +24,7 @@ int main(void)
 		/* data output to LCD */
 		switch (c_scr) {
 		/* humidity/temperature screen */
-		case 0:
+		case HT_SCR:
 			if (ht_res == -1)
 				lcd_wr_scr("Sensor error", 0x42);
 			else if (ht_res)
@@ -41,7 +41,7 @@ int main(void)
 			}
 			break;
 		/* date/time screen */
-		case 2:
+		case DT_SCR:
 			lcd_wr_str("current time", 0x02);
 			sprintf(bot_str, \
 				"%s%d:%s%d:%s%d  %s%d/%s%d", \
@@ -53,7 +53,7 @@ int main(void)
 			lcd_wr_str(bot_str, 0x40);
 			break;
 		/* timer screen */
-		case 4:
+		case T_SCR:
 			sprintf(top_str, \
 				"timer state: %s",
 				(timer.state)?("on"):("off"));
@@ -66,7 +66,7 @@ int main(void)
 			lcd_wr_str(bot_str, 0x40);
 			break;
 		/* date/time setup */
-		case 3:
+		case DTS_SCR:
 			sprintf(top_str, \
 				"date: %s%d/%s%d/%d", \
 				_val(date.dd), \
@@ -83,7 +83,7 @@ int main(void)
 			lcd_wr_instr(_set_ddram(dt_curs[c_ind]));
 			break;
 		/* timer setup */
-		case 5:
+		case TS_SCR:
 			sprintf(top_str, \
 				"%s%d:%s%d:%s%d", \
 				_val(timer.hh), \

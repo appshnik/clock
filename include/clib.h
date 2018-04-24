@@ -16,6 +16,12 @@
 #define C_SET_MD	(4)			/* clock SET mode */
 #define T_SET_MD	(3)			/* timer SET mode */
 
+#define HT_SCR		(0)			/* humidity/temperature screen*/
+#define DT_SCR		(2)			/* d/t screen number */
+#define T_SCR		(4)			/* timer screen number */
+#define DTS_SCR		(3)			/* d/t set screen number */
+#define TS_SCR		(5)			/* timer set screen number */
+
 /* IO definition */
 #define PREV_B		(1<<0)			/* "prev" button */
 #define UP_B		(1<<1)			/* "up" button */
