@@ -8,6 +8,7 @@ char top_str[STR_LEN];	/* top string of LCD */
 char bot_str[STR_LEN];	/* bottom string of LCD */
 uint8_t c_scr;		/* current screen number */
 uint8_t c_ind;		/* current index */
+uint8_t dt_ch;		/* flag that indicates date/time change */
 struct date date;	/* current date */
 struct time time;	/* current time */
 struct timer timer;	/* current timer values */
@@ -56,6 +57,12 @@ void ta_init(void)
 void var_init(void)
 {
 	c_scr = 0;
+	date.yy = 2018;
+	date.mth = 0;
+	date.dd = 4;
+	time.hh = 2;
+	time.mm = 22;
+	time.ss = 5;
 }
 
 /* MCLK init as 20 MHz*/
@@ -209,9 +216,11 @@ void p1_isr(void)
 		}
 		else if (c_scr == 3) {
 			*(dt_ptr[c_ind]) += 1;	/* increment parameter */
+			dt_ch = 1;
 		}
 		else if (c_scr == 5) {
 			*(t_ptr[c_ind]) += 1;	/* increment parameter */
+			dt_ch = 2;
 		}
 
 		P1IFG = P1IFG & ~UP_B;
@@ -225,9 +234,11 @@ void p1_isr(void)
 		}
 		else if (c_scr == 3) {
 			*(dt_ptr[c_ind]) -= 1;	/* decrement parameter */
+			dt_ch = 1;
 		}
 		else if (c_scr == 5) {
 			*(t_ptr[c_ind]) -= 1;	/* decrement parameter */
+			dt_ch = 2;
 		}
 		P1IFG = P1IFG & ~DOWN_B;
 	}

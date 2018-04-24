@@ -42,11 +42,14 @@ int main(void)
 			break;
 		/* date/time screen */
 		case 2:
-			lcd_wr_str("current time", 0x03);
+			lcd_wr_str("current time", 0x02);
 			sprintf(bot_str, \
-				"%d:%d:%d  %d/%d", \
-				time.hh, time.mm, time.ss, \
-				date.dd, date.mth);
+				"%s%d:%s%d:%s%d  %s%d/%s%d", \
+				_val(time.hh), \
+				_val(time.mm), \
+				_val(time.ss), \
+				_val(date.dd), \
+				_val(date.mth));
 			lcd_wr_str(bot_str, 0x40);
 			break;
 		/* timer screen */
@@ -56,19 +59,25 @@ int main(void)
 				(timer.state)?("on"):("off"));
 			lcd_wr_str(top_str, 0x00);
 			sprintf(bot_str, \
-				"%d:%d:%d left", \
-				timer.hh, timer.mm, timer.ss);
+				"%s%d:%s%d:%s%d left", \
+				_val(timer.hh), \
+				_val(timer.mm), \
+				_val(timer.ss));
 			lcd_wr_str(bot_str, 0x40);
 			break;
 		/* date/time setup */
 		case 3:
 			sprintf(top_str, \
-				"date: %2d/%2d/%4d", \
-				date.dd, date.mth, date.yy);
+				"date: %s%d/%s%d/%d", \
+				_val(date.dd), \
+				_val(date.mth), \
+				date.yy);
 			lcd_wr_str(top_str, 0x00);
 			sprintf(bot_str, \
-				"time: %2d:%2d:%2d", \
-				time.hh, time.mm, time.ss);
+				"time: %s%d:%s%d:%s%d", \
+				_val(time.hh), \
+				_val(time.mm), \
+				_val(time.ss));
 			lcd_wr_str(bot_str, 0x40);
 			/* display cursor in corresponding position */
 			lcd_wr_instr(_set_ddram(dt_curs[c_ind]));
@@ -76,8 +85,10 @@ int main(void)
 		/* timer setup */
 		case 5:
 			sprintf(top_str, \
-				"%2d:%2d:%2d", \
-				timer.hh, timer.mm, timer.ss);
+				"%s%d:%s%d:%s%d", \
+				_val(timer.hh), \
+				_val(timer.mm), \
+				_val(timer.ss));
 			lcd_wr_str(top_str, 0x00);
 			sprintf(bot_str, \
 				"timer %s",

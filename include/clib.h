@@ -36,6 +36,8 @@
 #define __delay_ms(ms)	(__delay_cycles((unsigned long)(CPU_F/1000UL * ms)))
 #define __delay_us(us)	(__delay_cycles((unsigned long)(CPU_F/1000000UL * us)))
 
+#define _val(var)	((var)>=10)?(""):("0"), (var)
+
 /* function definitions */
 void init_device(void);
 
