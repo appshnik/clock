@@ -60,6 +60,7 @@
 #define _display_clear	(0x01)
 #define _display_off	(0x08)
 #define _display_on	(0x0C)
+#define _cursor_on	(0x0F)
 #define _entry_mode_set	(0x06)
 #define _set_ddram(adr)	(0x80 | (adr))
 

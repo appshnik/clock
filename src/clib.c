@@ -12,12 +12,10 @@ struct date date;	/* current date */
 struct time time;	/* current time */
 struct timer timer;	/* current timer values */
 
-/* external variables */
-extern uint8_t rec_oper;
-extern uint8_t bit_count;
-/* extern struct hutemp ht_data; */
-extern uint16_t tar_val;
-/* extern signed char ht_res; */
+/* cursor position array for date/time setup screen */
+uint8_t dt_curs[] = {0x07, 0x0A, 0x0E, 0x47, 0x4A, 0x4D};
+/* cursor position array for timer setup screen */
+uint8_t t_curs[] = {0x01, 0x04, 0x07, 0x47};
 
 /* disable WDT */
 void wdt_init(void)
@@ -154,7 +152,13 @@ void p1_isr(void)
 {
 	uint8_t max_ind;
 
-	max_ind = 4;		/* maximum index value in current screen */
+	/* maximum index value in current screen */
+	if (c_scr == 3)
+		max_ind = sizeof(dt_curs)/sizeof(uint8_t) - 1;
+	else if (c_scr == 5)
+		max_ind = sizeof(t_curs)/sizeof(uint8_t) - 1;
+	else
+		max_ind = 0;
 
 	__delay_ms(300);	/* to avoid bouncing */
 
@@ -169,8 +173,10 @@ void p1_isr(void)
 		if (c_scr%2 == 0)
 			c_scr = (c_scr == 0)?(4):(c_scr - 2);
 		else {
-			if (c_ind == 0)
+			if (c_ind == 0) {
 				c_scr -= 1;
+				lcd_wr_instr(_display_on);
+			}
 			else
 				c_ind -= 1;
 		}
@@ -180,8 +186,10 @@ void p1_isr(void)
 		if (c_scr%2 == 0)
 			c_scr = (c_scr == 4)?(0):(c_scr + 2);
 		else {
-			if (c_ind == max_ind)
+			if (c_ind == max_ind) {
 				c_scr -= 1;
+				lcd_wr_instr(_display_on);
+			}
 			else
 				c_ind += 1;
 		}
@@ -192,6 +200,7 @@ void p1_isr(void)
 		if (c_scr%2 == 0) {
 			c_scr += 1;
 			c_ind = 0;
+			lcd_wr_instr(_cursor_on);
 		}
 		else {
 			/*TODO*/;	/* increment parameter */
@@ -203,6 +212,7 @@ void p1_isr(void)
 		if (c_scr%2 == 0) {
 			c_scr += 1;
 			c_ind = 0;
+			lcd_wr_instr(_cursor_on);
 		}
 		else {
 			/*TODO*/;	/* decrement parameter */

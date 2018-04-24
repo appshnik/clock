@@ -70,6 +70,8 @@ int main(void)
 				"time: %2d:%2d:%2d", \
 				time.hh, time.mm, time.ss);
 			lcd_wr_str(bot_str, 0x40);
+			/* display cursor in corresponding position */
+			lcd_wr_instr(_set_ddram(dt_curs[c_ind]));
 			break;
 		/* timer setup */
 		case 5:
@@ -81,6 +83,8 @@ int main(void)
 				"timer %s",
 				(timer.state)?("on"):("off"));
 			lcd_wr_str(bot_str, 0x40);
+			/* display cursor in corresponding position */
+			lcd_wr_instr(_set_ddram(t_curs[c_ind]));
 			break;
 		}
 	}

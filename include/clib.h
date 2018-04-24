@@ -70,6 +70,12 @@ extern char bot_str[STR_LEN];
 extern struct time time;
 extern struct timer timer;
 extern struct date date;
+extern uint8_t dt_curs[];
+extern uint8_t t_curs[];
+extern uint8_t rec_oper;
+extern uint8_t bit_count;
+extern uint16_t tar_val;
+
 
 
 #endif /* CLIB_H */
