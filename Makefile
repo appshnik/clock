@@ -15,7 +15,7 @@ CFLAGS		+= $(DEFINES)
 
 LDFLAGS		= -Wall $(MMCU)
 
-OBJS		= src/clib.o \
+OBJS		= src/board.o \
 		  src/main.o \
 		  src/lcd.o \
 		  src/sb.o
