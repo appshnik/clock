@@ -1,6 +1,15 @@
-#include <clib.h>
+#include <common.h>
+#include <board.h>
 #include <lcd.h>
 #include <sb.h>
+
+#define _val(var)	((var)>=10)?(""):("0"), (var)
+
+#define STR_LEN		(17)			/* LCD string length */
+
+char top_str[STR_LEN];	/* top string of LCD */
+char bot_str[STR_LEN];	/* bottom string of LCD */
+uint8_t sb_rec_oper;	/* data reading is active */
 
 int main(void)
 {
@@ -19,8 +28,20 @@ int main(void)
 	while (1) {
 		__delay_ms(500UL);
 		/* data reading from HT sensor */
-		if (sb_rec_oper)
+		if (sb_rec_oper) {
 			ht_res = sb_read_data();
+			sb_rec_oper = 0;
+		}
+		/* data writing to RTC */
+		if (dt_ch) {
+			if (dt_ch == 1) {
+				/*TODO: write date/time settings */;
+			}
+			else if (dt_ch == 2) {
+				/* TODO: write timer settings */;
+			}
+			dt_ch = 0;
+		}
 		/* data output to LCD */
 		switch (c_scr) {
 		/* humidity/temperature screen */
@@ -101,3 +122,6 @@ int main(void)
 	}
 	return 0;
 }
+
+
+

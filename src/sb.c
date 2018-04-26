@@ -1,8 +1,39 @@
-#include <clib.h>
+#include <common.h>
 #include <sb.h>
 
+#ifdef OUT
+#undef OUT
+#endif
+
+/************** Single-bus pinout settings ***************************/
+#define SB_PRT		P2		/* MCU's port for LCD's data bus */
+#define SDA		3		/* port pin for SDA */
+
+#define SB_MSK     	(1<<SDA)	/* port's pins for data bus */
+/*********************************************************************/
+
+#define MAX_RESP_TIME	32000
+#define ONE_MIN_TIME	65	/* us */
+#define ONE_MAX_TIME	75	/* us */
+#define ZERO_MIN_TIME	20	/* us */
+#define ZERO_MAX_TIME	30	/* us */
+
+#define cat(f, s)	f ## s
+#define xcat(a, b)	cat(a, b)
+
+#define SB_IN		xcat(SB_PRT, IN)
+#define SB_OUT		xcat(SB_PRT, OUT)
+#define SB_DIR		xcat(SB_PRT, DIR)
+#define SB_SEL		xcat(SB_PRT, SEL)
+#define SB_SEL2		xcat(SB_PRT, SEL2)
+#define SB_IE		xcat(SB_PRT, IE)
+
+#define _RELEASE_BUS	SB_DIR &= ~SB_MSK
+#define _OCCUPY_BUS	SB_DIR |= SB_MSK
+#define _SET_SB_OUT(x)	(x) ? (SB_OUT |= SB_MSK) : (SB_OUT &= ~SB_MSK)
+#define _SB_STATE	(SB_IN & SB_MSK)
+
 struct hutemp ht_data;		/* humidity and temperature data */
-uint8_t sb_rec_oper;		/* data reading is active */
 uint8_t bit_count;		/* number of already received bits */
 signed char ht_res;		/* result of reading:	-1 - sensor error
 							>0 - wrong data
@@ -25,7 +56,7 @@ uint16_t tar_val;		/* microseconds */
   * After start signal it disables any interrupts on this port and enables
   * the one that belongs to desired port pin. Function starts a cycle which is
   * to be performed while data transfer isn't finished (some flag is switched).
-  * Then interrupts settings are restored (all data receiving/storing work is
+  * Then interrupts settings are restored (all data receiving/storing job is
   * implemented in ISR).
   */
 
@@ -33,9 +64,9 @@ void sb_start(void)
 {
 	_OCCUPY_BUS;
 	_SET_SB_OUT(0);
-	_delay_ms(25);
+	__delay_ms(25);
 	_SET_SB_OUT(1);
-	_delay_us(30);
+	__delay_us(30);
 	_RELEASE_BUS;
 }
 
@@ -69,14 +100,13 @@ signed char sb_receive(void)
 	int8_t sign;		/* sign for temperature value */
 
 	itr = SB_IE;
-	sb_rec_oper = 0;
 	bit_count = 0;
 
 	/* enable sufficient interrupt */
 	TACTL = TACTL & ~TAIE;
 	SB_IE = SB_MSK;
 	/* wait while reading */
-	_delay_ms(100);
+	__delay_ms(100);
 	/* restore interrupt settings */
 	SB_IE = itr;
 	TACTL = TACTL | TAIE;

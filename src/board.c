@@ -1,11 +1,28 @@
-#include <clib.h>
+#include <common.h>
+#include <board.h>
 #include <lcd.h>
 #include <sb.h>
 
+#define TA_CNT		(615)			/* number of TA0 cycles ~2 sec*/
+
+/* IO definition */
+#define PREV_B		(1<<0)			/* "prev" button */
+#define UP_B		(1<<1)			/* "up" button */
+#define DOWN_B		(1<<2)			/* "down" button */
+#define NEXT_B		(1<<3)			/* "next" button */
+#define KEY_MSK		(PREV_B | \
+			UP_B | \
+			DOWN_B | \
+			NEXT_B)			/* keyboard mask */
+#define SB_MSK		(0x08)			/* single bus pin mask */
+
+/* event definition */
+#define PREV		(~P1IN & PREV_B)	/* "prev" button is pressed */
+#define UP		(~P1IN & UP_B)		/* "up" button is pressed */
+#define DOWN		(~P1IN & DOWN_B)	/* "down" button is pressed */
+#define NEXT		(~P1IN & NEXT_B)	/* "next" button is pressed */
 
 /* global variables */
-char top_str[STR_LEN];	/* top string of LCD */
-char bot_str[STR_LEN];	/* bottom string of LCD */
 uint8_t c_scr;		/* current screen number */
 uint8_t c_ind;		/* current index */
 uint8_t dt_ch;		/* flag that indicates date/time change */
@@ -41,8 +58,8 @@ void gpio_init(void)
 	P1IES = P1IES | KEY_MSK;
 	P1IE = P1IE | KEY_MSK;
 
-	SB_SEL &= ~SB_MSK;
-	SB_SEL2 &= ~SB_MSK;
+	P2SEL &= ~SB_MSK;
+	P2SEL2 &= ~SB_MSK;
 
 }
 /* Timer A initialization */
@@ -86,14 +103,14 @@ void init_device(void)
 }
 
 /* write next less significant bit */
-void wr_data(signed char bit, uint8_t *byte)
+void wr_next_bit(signed char bit, uint8_t *byte, uint8_t bit_cnt)
 {
 	if (bit)
 		*byte |= 1;
 	else
 		*byte &= ~1;
 	/* shift byte for next writing */
-	if (bit_count % 8 < 7)
+	if (bit_cnt % 8 < 7)
 		*byte = *byte << 1;
 }
 
@@ -112,26 +129,26 @@ void p2_isr(void)
 		if ((bit >= 0)) {
 			switch(bit_count / 8) {
 			case 0	:
-				wr_data(bit, &(ht_data.hum_h));
+				wr_next_bit(bit, &(ht_data.hum_h), bit_count);
 				break;
 			case 1	:
-				wr_data(bit, &(ht_data.hum_l));
+				wr_next_bit(bit, &(ht_data.hum_l), bit_count);
 				break;
 			case 2	:
-				wr_data(bit, &(ht_data.temp_h));
+				wr_next_bit(bit, &(ht_data.temp_h), bit_count);
 				break;
 			case 3	:
-				wr_data(bit, &(ht_data.temp_l));
+				wr_next_bit(bit, &(ht_data.temp_l), bit_count);
 				break;
 			case 4	:
-				wr_data(bit, &(ht_data.ch_sum));
+				wr_next_bit(bit, &(ht_data.ch_sum), bit_count);
 				break;
 			}
 		}
 		bit_count++;
 		if ((bit_count >= 40) || (bit < 0)) {
 			bit_count = 0;
-			SB_IE &= ~SB_MSK;
+			P2IE &= ~SB_MSK;
 		}
 	p2_isr_end:
 		P2IFG = P2IFG & ~SB_MSK;

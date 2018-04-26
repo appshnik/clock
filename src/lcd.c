@@ -1,8 +1,86 @@
+#include <common.h>
 #include <lcd.h>
 
-#ifndef CPU_F
-#define CPU_F		16000000UL	/* MCLK frequency */
+#ifdef OUT
+#undef OUT
 #endif
+
+/************** LCD pinout settings *************************************/
+#ifndef BUS_WIDTH
+#define BUS_WIDTH	4	/* LCD's data bus width (8/4 bits) */
+#endif
+
+#define LCD_B_PRT	P2	/* MCU's port for LCD's data bus */
+#define LCD_C_PRT	P2	/* MCU's port for LCD's control bits */
+
+#define LCD_D0		7	/* port pin for D0 (set 7 if BUS_WIDTH == 4) */
+#define LCD_D1		7	/* port pin for D1 (set 7 if BUS_WIDTH == 4) */
+#define LCD_D2		7	/* port pin for D2 (set 7 if BUS_WIDTH == 4) */
+#define LCD_D3		7	/* port pin for D3 (set 7 if BUS_WIDTH == 4) */
+#define LCD_D4		4	/* port pin for D4 */
+#define LCD_D5		5	/* port pin for D5 */
+#define LCD_D6		6	/* port pin for D6 */
+#define LCD_D7		7	/* port pin for D7 */
+
+#define LCD_RS		0	/* port pin for RS */
+#define LCD_RW		1	/* port pin for RW */
+#define LCD_E		2	/* port pin for E */
+
+#define LCD_B_MSK      (1<<LCD_D0 | \
+			1<<LCD_D1 | \
+			1<<LCD_D2 | \
+			1<<LCD_D3 | \
+			1<<LCD_D4 | \
+			1<<LCD_D5 | \
+			1<<LCD_D6 | \
+			1<<LCD_D7)	/* port's pins for data bus */
+
+#define LCD_C_MSK      (1<<LCD_RS | \
+			1<<LCD_RW | \
+			1<<LCD_E)	/* port's pins for control bits */
+/*********************************************************************/
+#define _delay		15	/* us, delay for read/write routine timings
+					if LCD doesn't work properly - try to
+					increase this value */
+
+#define _function_set_i	(0x38)
+#define _function_set	(BUS_WIDTH == 8) ? (0x38) : (0x28)
+#define _display_clear	(0x01)
+#define _display_off	(0x08)
+#define _display_on	(0x0C)
+#define _cursor_on	(0x0F)
+#define _entry_mode_set	(0x06)
+#define _set_ddram(adr)	(0x80 | (adr))
+
+#define cat(f, s)	f ## s
+#define xcat(a, b)	cat(a, b)
+
+#define LCD_B_IN	xcat(LCD_B_PRT, IN)
+#define LCD_B_OUT	xcat(LCD_B_PRT, OUT)
+#define LCD_C_OUT	xcat(LCD_C_PRT, OUT)
+#define LCD_B_DIR	xcat(LCD_B_PRT, DIR)
+#define LCD_C_DIR	xcat(LCD_C_PRT, DIR)
+#define LCD_B_SEL	xcat(LCD_B_PRT, SEL)
+#define LCD_C_SEL	xcat(LCD_C_PRT, SEL)
+#define LCD_B_SEL2	xcat(LCD_B_PRT, SEL2)
+#define LCD_C_SEL2	xcat(LCD_C_PRT, SEL2)
+
+#define _RS(st)		((st) ? \
+			(LCD_C_OUT |= 1<<LCD_RS) : \
+			(LCD_C_OUT &= ~(1<<LCD_RS)))
+#define _RW(st)		((st) ? \
+			(LCD_C_OUT |= 1<<LCD_RW) : \
+			(LCD_C_OUT &= ~(1<<LCD_RW)))
+#define _E(st)		((st) ? \
+			(LCD_C_OUT |= 1<<LCD_E) : \
+			(LCD_C_OUT &= ~(1<<LCD_E)))
+
+#define _READ_BF	_RS(0), _RW(1)
+#define _WRITE_DT	_RS(1), _RW(0)
+#define _WRITE_INS	_RS(0), _RW(0)
+
+#define _CLEAR_BUS	LCD_B_OUT &= ~LCD_B_MSK
+
 /* LCD initialization routine indicator */
 unsigned char init_flag;
 
@@ -13,27 +91,27 @@ unsigned char lcd_read(void)
 	if (BUS_WIDTH == 8) {
 		LCD_B_DIR &= ~LCD_B_MSK;
 		_CLEAR_BUS;
-		_delay_us(_delay);
+		__delay_us(_delay);
 		_E(1);
-		_delay_us(_delay);
+		__delay_us(_delay);
 		ret_val = LCD_B_IN & LCD_B_MSK;
 		_E(0);
-		_delay_us(_delay);
+		__delay_us(_delay);
 	}
 	else if (BUS_WIDTH == 4) {
 		LCD_B_DIR &= ~LCD_B_MSK;
 		_CLEAR_BUS;
-		_delay_us(_delay);
+		__delay_us(_delay);
 		_E(1);
-	_delay_us(_delay);
+		__delay_us(_delay);
 		ret_val = LCD_B_IN & LCD_B_MSK;
 		_E(0);
-		_delay_us(_delay);
+		__delay_us(_delay);
 		_E(1);
-		_delay_us(_delay);
+		__delay_us(_delay);
 		ret_val |= ((LCD_B_IN>>4) & ~(LCD_B_MSK));
 		_E(0);
-		_delay_us(_delay);
+		__delay_us(_delay);
 	}
 	return ret_val;
 }
@@ -43,7 +121,7 @@ void lcd_write(unsigned char val)
 	LCD_B_DIR |= LCD_B_MSK;
 	if ((BUS_WIDTH == 8) ||	(init_flag)) {
 		_CLEAR_BUS;
-		_delay_us(_delay);
+		__delay_us(_delay);
 		_E(1);
 		if (BUS_WIDTH == 8)
 		LCD_B_OUT |=  ((((val & (1<<7))?(1):(0))<<LCD_D7 | \
@@ -61,33 +139,33 @@ void lcd_write(unsigned char val)
 			 	((val & (1<<4))?(1):(0))<<LCD_D4 ) & LCD_B_MSK);
 
 
-		_delay_us(_delay);
+		__delay_us(_delay);
 		_E(0);
-		_delay_us(_delay);
+		__delay_us(_delay);
 	}
 	else if (BUS_WIDTH == 4) {
 		_CLEAR_BUS;
-		_delay_us(_delay);
+		__delay_us(_delay);
 		_E(1);
 		LCD_B_OUT |=  ((((val & (1<<7))?(1):(0))<<LCD_D7 | \
 			 	((val & (1<<6))?(1):(0))<<LCD_D6 | \
 			 	((val & (1<<5))?(1):(0))<<LCD_D5 | \
 			 	((val & (1<<4))?(1):(0))<<LCD_D4) & LCD_B_MSK);
 
-		_delay_us(_delay);
+		__delay_us(_delay);
 		_E(0);
-		_delay_us(_delay);
+		__delay_us(_delay);
 		_CLEAR_BUS;
-		_delay_us(_delay);
+		__delay_us(_delay);
 		_E(1);
 		LCD_B_OUT |=  ((((val & (1<<3))?(1):(0))<<LCD_D7 | \
 			 	((val & (1<<2))?(1):(0))<<LCD_D6 | \
 			 	((val & (1<<1))?(1):(0))<<LCD_D5 | \
 			 	((val & (1<<0))?(1):(0))<<LCD_D4) & LCD_B_MSK);
 
-		_delay_us(_delay);
+		__delay_us(_delay);
 		_E(0);
-		_delay_us(_delay);
+		__delay_us(_delay);
 	}
 }
 /* waits while LCD's controller is busy */
@@ -103,7 +181,7 @@ void lcd_check_busy(void)
 void lcd_wr_instr(unsigned char cmd)
 {
 	if (init_flag)
-		_delay_ms(5);
+		__delay_ms(5);
 	else
 		lcd_check_busy();
 	_WRITE_INS;
@@ -154,16 +232,16 @@ void lcd_init(void)
 	LCD_C_SEL2 &= ~LCD_C_MSK;
 	/* initialization routine */
 	init_flag = 1;
-	_delay_ms(50);
+	__delay_ms(50);
 	lcd_wr_instr(_function_set_i);
-	_delay_ms(10);
+	__delay_ms(10);
 	lcd_wr_instr(_function_set_i);
-	_delay_us(150);
+	__delay_us(150);
 	lcd_wr_instr(_function_set_i);
 
-	_delay_ms(10);
+	__delay_ms(10);
 	lcd_wr_instr(_function_set);
-	_delay_ms(10);
+	__delay_ms(10);
 	init_flag = 0;
 	/* function set (if interface is 4-bit) */
 	if (BUS_WIDTH == 4) {
@@ -171,18 +249,18 @@ void lcd_init(void)
 	}
 	/* display off */
 	lcd_wr_instr(_display_off);
-	_delay_ms(10);
+	__delay_ms(10);
 	/* display clear */
 	lcd_wr_instr(_display_clear);
-	_delay_ms(10);
+	__delay_ms(10);
 	/* entry mode set */
 	lcd_wr_instr(_entry_mode_set);
-	_delay_ms(10);
+	__delay_ms(10);
 	/* display on */
 	lcd_wr_instr(_display_on);
-	_delay_ms(10);
+	__delay_ms(10);
 	/* set ddram address */
 	lcd_wr_instr(_set_ddram(0x00));
-	_delay_ms(10);
+	__delay_ms(10);
 }
 
