@@ -91,6 +91,13 @@ void mclk_init(void)
 	BCSCTL1 = BCSCTL1 | 0x07;	// RSELx = 7 */
 
 }
+
+/* USCI init: I2C mode */
+void usci_init(void)
+{
+	UCB0CTL0 |= UCMST | UCMODE_3 | UCSYNC;
+}
+
 /* initialization routine */
 void init_device(void)
 {
@@ -98,6 +105,7 @@ void init_device(void)
 	wdt_init();
 	mclk_init();
 	gpio_init();
+	usci_init();
 	ta_init();
 	var_init();
 }
