@@ -55,5 +55,4 @@ extern struct time alarm;
 extern struct date date;
 extern struct hutemp ht_data;
 extern uint8_t sb_rec_oper;
-
 #endif	/* COMMON_H */

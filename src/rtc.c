@@ -154,11 +154,18 @@ void rtc_timer_remain()
 	else
 		rem_s = alm_s - now_s;
 
-	remain.ss = rem_s % 60;
-	rem_s = rem_s / 60;
-	remain.mm = rem_s % 60;
-	rem_s = rem_s / 60;
-	remain.hh = rem_s;
+	if (!remain.state) {
+		remain.ss = rem_s % 60;
+		rem_s = rem_s / 60;
+		remain.mm = rem_s % 60;
+		rem_s = rem_s / 60;
+		remain.hh = rem_s;
+	}
+	else {
+		remain.ss = 0;
+		remain.mm = 0;
+		remain.hh = 0;
+	}
 }
 /* get RTC timer state */
 void rtc_get_timer_st(void)
@@ -166,9 +173,7 @@ void rtc_get_timer_st(void)
 	if (rtc_read(1, rtc_al_st)) {
 		remain.state = rtc_buf[0] & 0x01;
 	}
-	if (!remain.state) {
-		rtc_timer_remain();
-	}
+	rtc_timer_remain();
 }
 /* get current RTC time */
 void rtc_get_time(void)
