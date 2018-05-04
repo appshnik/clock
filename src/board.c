@@ -220,15 +220,17 @@ void p1_isr(void)
 	if (timer.state && remain.state) {
 		P1IFG &= ~KEY_MSK;
 		timer.state = 0;
+		remain.state = 0;
 		dt_ch |= AL_ACK;
 		goto p1_isr_end;
 	}
-	/* this section avoids screen #1 due to it's absence */
+#if 0	/* this section avoids screen #1 due to it's absence */
 	if (((P1IFG & UP_B) || (P1IFG & DOWN_B)) && (c_scr == 0)) {
 		P1IFG = P1IFG & ~UP_B;
 		P1IFG = P1IFG & ~DOWN_B;
 		goto p1_isr_end;
 	}
+#endif
 
 	/* screen navigation */
 	if (P1IFG & PREV_B) {
