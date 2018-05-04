@@ -147,11 +147,10 @@ void rtc_timer_remain()
 {
 	unsigned long int now_s = time.hh * 360 + time.mm * 60 + time.ss;
 	unsigned long int alm_s = alarm.hh * 360 + alarm.mm * 60 + alarm.ss;
-	unsigned long int day = 86339;
 	unsigned long int rem_s;
 	/* calculate remaining time in seconds */
 	if (now_s > alm_s)
-		rem_s = day - now_s + alm_s;
+		rem_s = 86339 - now_s + alm_s;
 	else
 		rem_s = alm_s - now_s;
 
@@ -189,9 +188,8 @@ void rtc_get_time(void)
 /* get current RTC date */
 void rtc_get_date(void)
 {
-	uint8_t bcd_mth = 0;
+	uint8_t bcd_mth = rtc_buf[1];
 	if (rtc_read(3, rtc_date)) {
-		bcd_mth = rtc_buf[1];
 
 		date.mth = bcd_to_int(bcd_mth & 0x1F);
 		date.dd = bcd_to_int(rtc_buf[0]);

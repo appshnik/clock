@@ -104,7 +104,7 @@ int main(void)
 				(timer.state)?("on"):("off"));
 			lcd_wr_str(top_str, 0x00);
 			sprintf(bot_str, \
-				"%s%d:%s%d:%s%d left", \
+				"%s%u:%s%u:%s%u left", \
 				_val(remain.hh), \
 				_val(remain.mm), \
 				_val(remain.ss));
@@ -130,7 +130,7 @@ int main(void)
 		/* timer setup */
 		case TS_SCR:
 			sprintf(top_str, \
-				"%s%d:%s%d:%s%d", \
+				"%s%u:%s%u:%s%u", \
 				_val(timer.hh), \
 				_val(timer.mm), \
 				_val(timer.ss));
