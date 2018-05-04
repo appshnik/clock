@@ -274,9 +274,8 @@ void p1_isr(void)
 		else if (c_scr == TS_SCR) {
 			*(t_ptr[c_ind]) += 1;	/* increment parameter */
 			if (c_ind == 3)
-				dt_ch = TMS_CHANGED;
+				dt_ch |= TMS_CHANGED;
 		}
-
 		P1IFG = P1IFG & ~UP_B;
 	}
 	else if (P1IFG & DOWN_B) {

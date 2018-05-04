@@ -33,11 +33,27 @@ int main(void)
 	while (1) {
 		__delay_ms(500UL);
 
-
 		/* data reading from HT sensor */
 		if (sb_rec_oper) {
 			ht_res = sb_read_data();
 			sb_rec_oper = 0;
+		}
+		/* data writing to RTC */
+		if ((c_scr == DT_SCR) || (c_scr == T_SCR)) {
+			/* write date/time settings */
+			if (dt_ch & DS_CHANGED)
+				rtc_write_date();
+			if (dt_ch & TS_CHANGED)
+				rtc_write_time();
+			if (dt_ch & TMS_CHANGED)
+				rtc_write_timer();
+			if (dt_ch & AL_ACK)
+				rtc_write_ack();
+			if (dt_ch & STOP_ALARM) {
+				rtc_write_stop_alarm();
+				timer.state = 0;
+			}
+			dt_ch = 0;
 		}
 		/* data reading from RTC */
 		if (!dt_ch) {
@@ -46,23 +62,6 @@ int main(void)
 		}
 		if (timer.state) {
 			rtc_get_timer_st();
-		}
-		/* data writing to RTC */
-		if (c_scr == DT_SCR || c_scr == T_SCR) {
-			/* write date/time settings */
-			if (dt_ch & DS_CHANGED)
-				rtc_write_date();
-			else if (dt_ch & TS_CHANGED)
-				rtc_write_time();
-			else if (dt_ch & TMS_CHANGED)
-				rtc_write_timer();
-			else if (dt_ch & AL_ACK)
-				rtc_write_ack();
-			else if (dt_ch & STOP_ALARM) {
-				rtc_write_stop_alarm();
-				timer.state = 0;
-			}
-			dt_ch = 0;
 		}
 		/* data output to LCD */
 		switch (c_scr) {

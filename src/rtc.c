@@ -188,9 +188,9 @@ void rtc_get_time(void)
 /* get current RTC date */
 void rtc_get_date(void)
 {
-	uint8_t bcd_mth = rtc_buf[1];
-	if (rtc_read(3, rtc_date)) {
 
+	if (rtc_read(3, rtc_date)) {
+		uint8_t bcd_mth = rtc_buf[1];
 		date.mth = bcd_to_int(bcd_mth & 0x1F);
 		date.dd = bcd_to_int(rtc_buf[0]);
 		date.yy = (int)(bcd_to_int(rtc_buf[2])) + \
