@@ -2,6 +2,7 @@
 #include <board.h>
 #include <lcd.h>
 #include <sb.h>
+#include <rtc.h>
 
 #define TA_CNT		(615)			/* number of TA0 cycles ~2 sec*/
 
@@ -25,10 +26,15 @@
 /* global variables */
 uint8_t c_scr;		/* current screen number */
 uint8_t c_ind;		/* current index */
-uint8_t dt_ch;		/* flag that indicates date/time change */
+uint8_t dt_ch;		/* indicates date/time change:  bit 0 - date changed
+							bit 1 - time changed
+							bit 2 - timer changed
+							bit 3 - acknowledge */
 struct date date;	/* current date */
 struct time time;	/* current time */
 struct timer timer;	/* current timer values */
+struct timer remain;	/* timer remain values */
+struct time alarm;	/* alarm time */
 
 /* cursor position array for date/time setup screen */
 uint8_t dt_curs[] = {0x07, 0x0A, 0x0F, 0x47, 0x4A, 0x4D};
@@ -49,15 +55,16 @@ void wdt_init(void)
 /* ports 1 and 2 initialization */
 void gpio_init(void)
 {
-	P2IES = 0x00;
-	P2IE = 0x00;
-
 	P1DIR = P1DIR & ~KEY_MSK;	/* set pins as inputs for buttons */
-	P1SEL = P1SEL & ~KEY_MSK;	/* disable pin multiplexing */
-	P1SEL2 = P1SEL2 & ~KEY_MSK;	/* disable pin multiplexing */
+	P1SEL = P1SEL & ~KEY_MSK;	/* pin function set */
+	P1SEL2 = P1SEL2 & ~KEY_MSK;	/* pin function set */
+	P1SEL |= (BIT6 | BIT7);		/* I2C function */
+	P1SEL2 |= (BIT6 | BIT7);	/* I2C function */
 	P1IES = P1IES | KEY_MSK;
 	P1IE = P1IE | KEY_MSK;
 
+	P2IES = 0x00;
+	P2IE = 0x00;
 	P2SEL &= ~SB_MSK;
 	P2SEL2 &= ~SB_MSK;
 
@@ -73,7 +80,7 @@ void ta_init(void)
 /* variables initialization */
 void var_init(void)
 {
-	c_scr = 0;
+	c_scr = 2;
 	date.yy = 2018;
 	date.mth = 0;
 	date.dd = 4;
@@ -91,15 +98,33 @@ void mclk_init(void)
 	BCSCTL1 = BCSCTL1 | 0x07;	// RSELx = 7 */
 
 }
+
+/* USCI init: I2C mode */
+void usci_init(void)
+{
+	IE2 |= (UCB0TXIE | UCB0RXIE);
+	while (UCB0CTL1 & UCTXSTP);
+	UCB0CTL1 |= UCSWRST;
+	/* UCB0 is master, I2C mode, synchronous mode */
+	UCB0CTL0 |= UCMST | UCMODE_3 | UCSYNC;
+	UCB0CTL1 |= UCSSEL_2;
+	UCB0BR0 = 250;
+	UCB0BR1 = 0;
+	UCB0I2CSA = 0x68;
+	UCB0CTL1 &= ~UCSWRST;
+
+}
+
 /* initialization routine */
 void init_device(void)
 {
-	__enable_interrupt();
 	wdt_init();
 	mclk_init();
 	gpio_init();
+	usci_init();
 	ta_init();
 	var_init();
+	__enable_interrupt();
 }
 
 /* write next less significant bit */
@@ -191,12 +216,22 @@ void p1_isr(void)
 
 	__delay_ms(300);	/* to avoid bouncing */
 
-	/* this section avoids screen #1 due to it's absence */
+	/* acknowledge alarm */
+	if (timer.state && remain.state) {
+		P1IFG &= ~KEY_MSK;
+		timer.state = 0;
+		remain.state = 0;
+		dt_ch |= AL_ACK;
+		goto p1_isr_end;
+	}
+#if 0	/* this section avoids screen #1 due to it's absence */
 	if (((P1IFG & UP_B) || (P1IFG & DOWN_B)) && (c_scr == 0)) {
 		P1IFG = P1IFG & ~UP_B;
 		P1IFG = P1IFG & ~DOWN_B;
 		goto p1_isr_end;
 	}
+#endif
+
 	/* screen navigation */
 	if (P1IFG & PREV_B) {
 		if (c_scr%2 == 0)
@@ -233,13 +268,16 @@ void p1_isr(void)
 		}
 		else if (c_scr == DTS_SCR) {
 			*(dt_ptr[c_ind]) += 1;	/* increment parameter */
-			dt_ch = 1;
+			if (c_ind <= 2)
+				dt_ch |= DS_CHANGED;
+			else
+				dt_ch |= TS_CHANGED;
 		}
 		else if (c_scr == TS_SCR) {
 			*(t_ptr[c_ind]) += 1;	/* increment parameter */
-			dt_ch = 2;
+			if (c_ind == 3)
+				dt_ch |= TMS_CHANGED;
 		}
-
 		P1IFG = P1IFG & ~UP_B;
 	}
 	else if (P1IFG & DOWN_B) {
@@ -251,15 +289,17 @@ void p1_isr(void)
 		}
 		else if (c_scr == DTS_SCR) {
 			*(dt_ptr[c_ind]) -= 1;	/* decrement parameter */
-			dt_ch = 1;
+			if (c_ind <= 2)
+				dt_ch |= DS_CHANGED;
+			else
+				dt_ch |= TS_CHANGED;
 		}
 		else if (c_scr == TS_SCR) {
 			*(t_ptr[c_ind]) -= 1;	/* decrement parameter */
-			dt_ch = 2;
+			if (c_ind == 3)
+				dt_ch |= STOP_ALARM;
 		}
 		P1IFG = P1IFG & ~DOWN_B;
 	}
-p1_isr_end:
-	;
+p1_isr_end:;
 }
-

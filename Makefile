@@ -18,7 +18,9 @@ LDFLAGS		= -Wall $(MMCU)
 OBJS		= src/board.o \
 		  src/main.o \
 		  src/lcd.o \
-		  src/sb.o
+		  src/sb.o \
+		  src/rtc.o \
+		  src/TI_USCI_I2C_master.o
 
 OUTELF		= clock.elf
 OUTLST		= clock.lst

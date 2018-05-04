@@ -13,6 +13,12 @@
 #define __delay_ms(ms)	(__delay_cycles((unsigned long)(CPU_F/1000UL * ms)))
 #define __delay_us(us)	(__delay_cycles((unsigned long)(CPU_F/1000000UL * us)))
 
+#define DS_CHANGED	(0x01)			/* data settings changed */
+#define TS_CHANGED	(0x02)			/* time settings changed */
+#define TMS_CHANGED	(0x04)			/* timer settings changed */
+#define AL_ACK		(0x08)			/* acknowledge alarm */
+#define STOP_ALARM	(0x10)			/* switch off alarm */
+
 /* Types */
 struct date {
 	int yy;			/* year */
@@ -44,8 +50,9 @@ struct hutemp {
 extern uint8_t dt_ch;		/* flag that indicates date/time change */
 extern struct time time;
 extern struct timer timer;
+extern struct timer remain;
+extern struct time alarm;
 extern struct date date;
 extern struct hutemp ht_data;
 extern uint8_t sb_rec_oper;
-
 #endif	/* COMMON_H */
