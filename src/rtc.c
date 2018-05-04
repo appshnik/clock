@@ -145,21 +145,15 @@ void rtc_write_stop_alarm(void)
 /* calculate timer remain */
 void rtc_timer_remain()
 {
-	unsigned long int now_s = time.hh * 360 + time.mm * 60 + time.ss;
-	unsigned long int alm_s = alarm.hh * 360 + alarm.mm * 60 + alarm.ss;
-	unsigned long int rem_s;
-	/* calculate remaining time in seconds */
-	if (now_s > alm_s)
-		rem_s = 86339 - now_s + alm_s;
-	else
-		rem_s = alm_s - now_s;
+	unsigned long int now_s = time.hh * 3600L + time.mm * 60 + time.ss;
+	unsigned long int alm_s = alarm.hh * 3600L + alarm.mm * 60 + alarm.ss;
+	unsigned long int rem_s = 86400L - now_s + alm_s;
+
 
 	if (!remain.state) {
 		remain.ss = rem_s % 60;
-		rem_s = rem_s / 60;
-		remain.mm = rem_s % 60;
-		rem_s = rem_s / 60;
-		remain.hh = rem_s;
+		remain.mm = (rem_s / 60) % 60;
+		remain.hh = ((rem_s / 60) /60) % 24;
 	}
 	else {
 		remain.ss = 0;
