@@ -1,5 +1,5 @@
 #include <common.h>
-#include <TI_USCI_I2C_master.h>
+#include <i2c_bus.h>
 
 signed char byteCtr;
 unsigned char *TI_receive_field;

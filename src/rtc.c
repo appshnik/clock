@@ -1,5 +1,5 @@
 #include <common.h>
-#include <TI_USCI_I2C_master.h>
+#include <i2c_bus.h>
 #include <rtc.h>
 
 #define RTC_ADDR	(0x68)		/* RTC modules I2C bus address */
