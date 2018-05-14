@@ -16,11 +16,11 @@ CFLAGS		+= $(DEFINES)
 LDFLAGS		= -Wall $(MMCU)
 
 OBJS		= src/board.o \
-		  src/main.o \
+		  src/i2c_bus.o \
 		  src/lcd.o \
-		  src/sb.o \
+		  src/main.o \
 		  src/rtc.o \
-		  src/TI_USCI_I2C_master.o
+		  src/sb.o
 
 OUTELF		= clock.elf
 OUTLST		= clock.lst
