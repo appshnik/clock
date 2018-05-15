@@ -36,8 +36,6 @@ CPPCHECK_FLAGS	+= --inline-suppr -D__STDC__
 default: $(OBJS)
 	@echo [LD] $(OUTELF)
 	@$(LD) $(LDFLAGS) -o $(OUTELF) $^
-	@echo [OBJDUMP] $(OUTLST)
-	@$(OBJDUMP) -DS $(OUTELF) > $(OUTLST)
 
 %.o: %.c
 	@echo [CC] $<
@@ -45,6 +43,10 @@ default: $(OBJS)
 
 ctags:
 	@ctags $(OBJS:.o=.c)
+	
+dump: $(OUTELF)
+	@echo [OBJDUMP] $(OUTLST)
+	@$(OBJDUMP) -DS $(OUTELF) > $(OUTLST)
 
 flash: $(OUTELF)
 	$(MCUDBG) $(DRV) "prog $(OUTELF)"
