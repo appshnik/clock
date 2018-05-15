@@ -4,7 +4,7 @@ DEFINES		= -D__STDC_VERSION__=199401L
 CROSS_COMPILE	?= msp430-
 CC		= $(CROSS_COMPILE)gcc
 LD		= $(CROSS_COMPILE)gcc
-OBJ_DMP		= $(CROSS_COMPILE)objdump
+OBJDUMP		= $(CROSS_COMPILE)objdump
 MCU		= msp430g2553
 MMCU		= -mmcu=$(MCU)
 
@@ -37,8 +37,8 @@ CPPCHECK_FLAGS	+= --inline-suppr -D__STDC__
 default: $(OBJS)
 	@echo [LD] $(OUTELF)
 	@$(LD) $(LDFLAGS) -o $(OUTELF) $^
-	@echo [OBJ_DMP] $(OUTLST)
-	@$(OBJ_DMP) -DS $(OUTELF) > $(OUTLST)
+	@echo [OBJDUMP] $(OUTLST)
+	@$(OBJDUMP) -DS $(OUTELF) > $(OUTLST)
 
 %.o: %.c
 	@echo [CC] $<
