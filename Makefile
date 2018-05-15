@@ -6,14 +6,13 @@ CC		= $(CROSS_COMPILE)gcc
 LD		= $(CROSS_COMPILE)gcc
 OBJDUMP		= $(CROSS_COMPILE)objdump
 MCU		= msp430g2553
-MMCU		= -mmcu=$(MCU)
 
 CFLAGS		= -Wall -Os
 CFLAGS		+= -MD -pedantic -ansi -Werror -Wextra
 CFLAGS		+= $(INCLUDES)
 CFLAGS		+= $(DEFINES)
 
-LDFLAGS		= -Wall $(MMCU)
+LDFLAGS		= -Wall -mmcu=$(MCU)
 
 OBJS		= src/board.o \
 		  src/i2c_bus.o \
@@ -42,7 +41,7 @@ default: $(OBJS)
 
 %.o: %.c
 	@echo [CC] $<
-	@$(CC) -c $< $(MMCU) -o $@ $(CFLAGS)
+	@$(CC) -c $< -mmcu=$(MCU) -o $@ $(CFLAGS)
 
 ctags:
 	@ctags $(OBJS:.o=.c)
