@@ -38,10 +38,7 @@ int rtc_check(uint8_t addr)
 {
 	i2c_transmitinit(addr, RTC_BR_DIV);
 	while (i2c_busy());
-	if (i2c_check_slave(addr))
-		return 1;	/* slave exists */
-	else
-		return 0;	/* slave doesn't exist */
+	return i2c_check_slave(addr);
 }
 /* read given amount of bytes b_cnt to rtc_buf
 from specified RTC register rtc_reg*/
