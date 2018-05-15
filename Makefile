@@ -23,7 +23,7 @@ OBJS		= src/board.o \
 
 OUTELF		= clock.elf
 OUTLST		= clock.lst
-DRV		= rf2500
+PROGRAMMER	= rf2500
 
 MSP430_INC	= -I/usr/msp430/include -I/usr/lib/gcc/msp430/4.6.3/include
 MSP430_DEF	= -D__MSP430G2553__
@@ -48,7 +48,7 @@ dump: $(OUTELF)
 	@$(OBJDUMP) -DS $(OUTELF) > $(OUTLST)
 
 flash: $(OUTELF)
-	mspdebug $(DRV) "prog $(OUTELF)"
+	mspdebug $(PROGRAMMER) "prog $(OUTELF)"
 
 clean:
 	@-rm -rf $(OUTELF) $(OUTLST) tags
