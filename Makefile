@@ -12,7 +12,7 @@ CFLAGS		+= -MD -pedantic -ansi -Werror -Wextra
 CFLAGS		+= $(INCLUDES)
 CFLAGS		+= $(DEFINES)
 
-LDFLAGS		= -Wall -mmcu=$(MCU)
+LDFLAGS		= -mmcu=$(MCU)
 
 OBJS		= src/board.o \
 		  src/i2c_bus.o \
