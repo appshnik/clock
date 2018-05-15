@@ -60,21 +60,20 @@ int rtc_read(uint8_t b_cnt, uint8_t *rtc_reg)
 		return 0;
 	}
 }
+
 /* write given amount of bytes b_cnt from rtc_buf
 to specified RTC register rtc_reg*/
 int rtc_write(uint8_t b_cnt, uint8_t *rtc_reg)
 {
 	rtc_buf[0] = *rtc_reg;
-	if (rtc_check(RTC_ADDR)) {
-		/* write register pointer to RTC */
-		i2c_transmitinit(RTC_ADDR, RTC_BR_DIV);
-		i2c_transmit(b_cnt, rtc_buf);
-		while (i2c_busy());
-
-		return 1;
-	} else {
+	if (!rtc_check(RTC_ADDR))
 		return 0;
-	}
+	
+	/* write register pointer to RTC */
+	i2c_transmitinit(RTC_ADDR, RTC_BR_DIV);
+	i2c_transmit(b_cnt, rtc_buf);
+	while (i2c_busy());
+	return 1;
 }
 
 /* write current time to RTC */
