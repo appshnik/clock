@@ -6,13 +6,13 @@
 #define RTC_BR_DIV	250		/* Divider for baud-rate calculation */
 
 /* Global variables*/
-uint8_t rtc_buf[5];
+static uint8_t rtc_buf[5];
 
-uint8_t rtc_time[] = {0x00};
-uint8_t rtc_date[] = {0x04};
-uint8_t rtc_timer[] = {0x07};
-uint8_t rtc_al_contr[] = {0x0E};
-uint8_t rtc_al_st[] = {0x0F};
+static const uint8_t rtc_time[] = {0x00};
+static const uint8_t rtc_date[] = {0x04};
+static const uint8_t rtc_timer[] = {0x07};
+static const uint8_t rtc_al_contr[] = {0x0E};
+static const uint8_t rtc_al_st[] = {0x0F};
 
 uint8_t bcd_to_int(uint8_t bcd)
 {
@@ -34,7 +34,7 @@ uint8_t int_to_bcd(uint8_t val)
 }
 
 /* checks if there is a slave with given address on the bus */
-int rtc_check(uint8_t addr)
+static int rtc_check(uint8_t addr)
 {
 	i2c_transmitinit(addr, RTC_BR_DIV);
 	while (i2c_busy());
@@ -42,33 +42,31 @@ int rtc_check(uint8_t addr)
 }
 /* read given amount of bytes b_cnt to rtc_buf
 from specified RTC register rtc_reg*/
-int rtc_read(uint8_t b_cnt, uint8_t *rtc_reg)
+static int rtc_read(uint8_t b_cnt, const uint8_t *rtc_reg)
 {
-	if (rtc_check(RTC_ADDR)) {
-		/* write register pointer to RTC */
-		i2c_transmitinit(RTC_ADDR, RTC_BR_DIV);
-		i2c_transmit(1, rtc_reg);
-		while (i2c_busy());
-
-		i2c_receiveinit(RTC_ADDR, RTC_BR_DIV);
-		while (i2c_busy());
-		i2c_receive(b_cnt, rtc_buf);
-		while (i2c_busy());
-
-		return 1;
-	} else {
+	if (!rtc_check(RTC_ADDR))
 		return 0;
-	}
+
+	/* write register pointer to RTC */
+	i2c_transmitinit(RTC_ADDR, RTC_BR_DIV);
+	i2c_transmit(1, rtc_reg);
+	while (i2c_busy());
+
+	i2c_receiveinit(RTC_ADDR, RTC_BR_DIV);
+	while (i2c_busy());
+	i2c_receive(b_cnt, rtc_buf);
+	while (i2c_busy());
+	return 1;
 }
 
 /* write given amount of bytes b_cnt from rtc_buf
 to specified RTC register rtc_reg*/
-int rtc_write(uint8_t b_cnt, uint8_t *rtc_reg)
+static int rtc_write(uint8_t b_cnt, const uint8_t *rtc_reg)
 {
 	rtc_buf[0] = *rtc_reg;
 	if (!rtc_check(RTC_ADDR))
 		return 0;
-	
+
 	/* write register pointer to RTC */
 	i2c_transmitinit(RTC_ADDR, RTC_BR_DIV);
 	i2c_transmit(b_cnt, rtc_buf);
@@ -140,7 +138,7 @@ void rtc_write_stop_alarm(void)
 }
 
 /* calculate timer remain */
-void rtc_timer_remain()
+static void rtc_timer_remain(void)
 {
 	unsigned long int now_s = time.hh * 3600L + time.mm * 60 + time.ss;
 	unsigned long int alm_s = alarm.hh * 3600L + alarm.mm * 60 + alarm.ss;
