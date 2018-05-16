@@ -54,9 +54,6 @@ clean:
 	@-rm -f $(OBJS)
 	@-rm -f $(OBJS:.o=.d)
 
-distclean:
-	@make clean
-
 _check_sparse:
 	@echo "---> Checking with sparse..."
 	@find . -type f -name '*.[ch]' -exec sparse $(SPARSE_FLAGS) {} \;
