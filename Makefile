@@ -23,7 +23,6 @@ OBJS		= src/board.o \
 
 OUTELF		= clock.elf
 OUTLST		= clock.lst
-PROGRAMMER	= rf2500
 
 MSP430_INC	= -I/usr/msp430/include -I/usr/lib/gcc/msp430/4.6.3/include
 MSP430_DEF	= -D__MSP430G2553__
@@ -33,22 +32,22 @@ CPPCHECK_FLAGS	= --enable=all $(MSP430_CFLAGS) $(INCLUDES) $(DEFINES)
 CPPCHECK_FLAGS	+= --inline-suppr -D__STDC__
 
 default: $(OBJS)
-	@echo [LD] $(OUTELF)
+	@echo LD $(OUTELF)
 	@$(LD) $(LDFLAGS) -o $(OUTELF) $^
 
 %.o: %.c
-	@echo [CC] $<
+	@echo CC $<
 	@$(CC) -c $< -mmcu=$(MCU) -o $@ $(CFLAGS)
 
 ctags:
 	@ctags $(OBJS:.o=.c)
 	
 dump: $(OUTELF)
-	@echo [OBJDUMP] $(OUTLST)
+	@echo OBJDUMP $(OUTLST)
 	@$(OBJDUMP) -DS $(OUTELF) > $(OUTLST)
 
 flash: $(OUTELF)
-	mspdebug $(PROGRAMMER) "prog $(OUTELF)"
+	mspdebug rf2500 "prog $(OUTELF)"
 
 clean:
 	@-rm -rf $(OUTELF) $(OUTLST) tags
@@ -60,7 +59,7 @@ distclean:
 
 _check_sparse:
 	@echo "---> Checking with sparse..."
-	@find . -type f -name '*.{c,h}' -exec sparse $(SPARSE_FLAGS) {} \;
+	@find . -type f -name '*.[ch]' -exec sparse $(SPARSE_FLAGS) {} \;
 	@echo
 
 _check_cppcheck:
