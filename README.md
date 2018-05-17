@@ -19,7 +19,7 @@ there - just try to unplug usb-cable and plug it in once again). Type
 
 ## Hardware structure ##
 
-![](//kitchen_clock_schem.jpg/150x50)
+![](https://github.com/appshnik/clock/blob/master/citchen_clock_schem.jpg)
 
 Device consists of:
 1. MSP430G2553 controller
