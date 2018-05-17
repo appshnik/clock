@@ -44,7 +44,7 @@ void i2c_transmitinit(unsigned char slave_address, unsigned char prescale)
 /*
  * This function is used to start an I2C commuincation in master-receiver mode.
  */
-void i2c_receive(unsigned char byteCount, unsigned char *field)
+void i2c_receive(unsigned char byteCount, const unsigned char *field)
 {
 	i2c_rx_buf = field;
 	if ( byteCount == 1 ) {
@@ -65,7 +65,7 @@ void i2c_receive(unsigned char byteCount, unsigned char *field)
 /*
  * This function is used to start an I2C commuincation in master-transmit mode.
  */
-void i2c_transmit(unsigned char byteCount, unsigned char *field)
+void i2c_transmit(unsigned char byteCount, const unsigned char *field)
 {
 	i2c_tx_buf = field;
 	byte_num = byteCount;
