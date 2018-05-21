@@ -8,13 +8,14 @@
 
 #define STR_LEN		(17)			/* LCD string length */
 
-char top_str[STR_LEN];	/* top string of LCD */
-char bot_str[STR_LEN];	/* bottom string of LCD */
+
 uint8_t sb_rec_oper;	/* data reading is active */
 
 
 int main(void)
 {
+	char top_str[STR_LEN];	/* top string of LCD */
+	char bot_str[STR_LEN];	/* bottom string of LCD */
 
 	/* initialization */
 	init_device();

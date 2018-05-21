@@ -82,7 +82,7 @@
 #define _CLEAR_BUS	LCD_B_OUT &= ~LCD_B_MSK
 
 /* LCD initialization routine indicator */
-unsigned char init_flag;
+static unsigned char init_flag;
 
 /* reads data from LCD */
 unsigned char lcd_read(void)
