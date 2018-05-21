@@ -6,8 +6,8 @@
 
 void i2c_receiveinit(unsigned char slave_address, unsigned char prescale);
 void i2c_transmitinit(unsigned char slave_address, unsigned char prescale);
-void i2c_receive(unsigned char byteCount, const unsigned char *field);
-void i2c_transmit(unsigned char byteCount, const unsigned char *field);
+void i2c_receive(unsigned char byteCount, unsigned char *field);
+void i2c_transmit(unsigned char byteCount, unsigned char *field);
 unsigned char i2c_check_slave(unsigned char slave_address);
 unsigned char i2c_busy(void);
 
