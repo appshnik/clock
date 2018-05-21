@@ -39,7 +39,7 @@ signed char ht_res;		/* result of reading:	-1 - sensor error
 							>0 - wrong data
 							 0 - ok */
 
-uint16_t tar_val;		/* microseconds */
+static uint16_t tar_val;	/* microseconds */
 
 /* interrupt service routine for SB pin */
 /**
