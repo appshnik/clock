@@ -8,11 +8,11 @@
 /* Global variables*/
 static uint8_t rtc_buf[5];
 
-static const uint8_t rtc_time[] = {0x00};
-static const uint8_t rtc_date[] = {0x04};
-static const uint8_t rtc_timer[] = {0x07};
-static const uint8_t rtc_al_contr[] = {0x0E};
-static const uint8_t rtc_al_st[] = {0x0F};
+static uint8_t rtc_time[] = {0x00};
+static uint8_t rtc_date[] = {0x04};
+static uint8_t rtc_timer[] = {0x07};
+static uint8_t rtc_al_contr[] = {0x0E};
+static uint8_t rtc_al_st[] = {0x0F};
 
 uint8_t bcd_to_int(uint8_t bcd)
 {
@@ -42,7 +42,7 @@ static int rtc_check(uint8_t addr)
 }
 /* read given amount of bytes b_cnt to rtc_buf
 from specified RTC register rtc_reg*/
-static int rtc_read(uint8_t b_cnt, const uint8_t *rtc_reg)
+static int rtc_read(uint8_t b_cnt, uint8_t *rtc_reg)
 {
 	if (!rtc_check(RTC_ADDR))
 		return 0;
