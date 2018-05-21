@@ -74,7 +74,7 @@ _check_clang:
 	@$(MAKE) clean >/dev/null 2>/dev/null
 	@echo
 
-check: _check_sparse #_check_cppcheck _check_clang
+check: _check_sparse _check_cppcheck _check_clang
 
 .PHONY: default flash clean distclean ctags
 
