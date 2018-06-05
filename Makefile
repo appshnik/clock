@@ -15,6 +15,7 @@ CFLAGS		+= $(DEFINES)
 LDFLAGS		= -mmcu=$(MCU)
 
 OBJS		= src/board.o \
+		  src/common.o \
 		  src/i2c_bus.o \
 		  src/lcd.o \
 		  src/main.o \

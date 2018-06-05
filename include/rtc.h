@@ -1,6 +1,8 @@
 #ifndef RTC_H
 #define RTC_H
 
+#include <stdint.h>
+
 /* function definitions */
 void rtc_get_time(void);
 void rtc_get_date(void);

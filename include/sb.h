@@ -1,6 +1,8 @@
 #ifndef SB_H
 #define SB_H
 
+#include <stdint.h>
+
 /* function definitions */
 void sb_start(void);
 uint8_t sb_resp(void);

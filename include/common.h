@@ -46,6 +46,10 @@ struct hutemp {
 	int temp;		/* current humidity */
 };
 
+/* Function prototypes */
+uint8_t bcd_to_int(uint8_t bcd);
+uint8_t int_to_bcd(uint8_t val);
+
 /* external variables */
 extern uint8_t dt_ch;		/* flag that indicates date/time change */
 extern struct time time;

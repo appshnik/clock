@@ -1,6 +1,8 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#include <stdint.h>
+
 #define HT_SCR		(0)			/* humidity/temperature screen*/
 #define DT_SCR		(2)			/* d/t screen number */
 #define T_SCR		(4)			/* timer screen number */
