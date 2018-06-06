@@ -48,9 +48,11 @@
 #define _SET_SB_OUT(x)	(x) ? (SB_OUT |= SB_MSK) : (SB_OUT &= ~SB_MSK)
 #define _SB_STATE	(SB_IN & SB_MSK)
 
-uint8_t bit_count;		/* number of already received bits */
+static uint16_t bit_count;	/* number of already received bits */
 
 static uint16_t tar_val;	/* microseconds */
+
+
 
 /* interrupt service routine for SB pin */
 /**
@@ -71,6 +73,7 @@ static uint16_t tar_val;	/* microseconds */
   * implemented in ISR).
   */
 
+/* Generates START condition on the bus */
 void one_wire_start(void)
 {
 	_OCCUPY_BUS;
@@ -144,14 +147,45 @@ signed char one_wire_get_bit(void)
 }
 
 /* Data receiving routine */
-signed char one_wire_read_data(void)
+signed char one_wire_read_data(uint16_t bit_number)
 {
+	/* struct to hold previous interrupts settings */
+	struct p_itr_set {
+		uint8_t p1;
+		uint8_t p2;
+		uint8_t wdt;
+		uint8_t ta0;
+	} itr;
+	struct p_itr_set *p_itr = &itr;
+	memset(p_itr, 0, sizeof(itr));
+
+	__disable_interrupt();
+	/* save interrupt settings and disable unwanted one's */
+	p_itr->p1 = P1IE;
+	P1IE = 0x0;
+	p_itr->p2 = P2IE;
+	P2IE = 0x0 | SB_MSK;
+	p_itr->wdt = IE1;
+	IE1 = 0x0;
+	p_itr->ta0 = TACTL;
+	TACTL = TACTL & ~TAIE;
 	/* send start signal to sensor */
 	one_wire_start();
 	/* check if sensor has responded */
-	if (one_wire_resp())
+	if (one_wire_resp()) {
 		/* start bit reading sequence */
-		return one_wire_receive();
-	else
+		bit_count = 0;
+		__enable_interrupt();
+		while (bit_count < bit_number);
+	} else {
 		return -1;
+	}
+	/* restore interrupt settings */
+	P1IE = p_itr->p1;
+	P2IE = p_itr->p2;
+	IE1 = p_itr->wdt;
+	TACTL = p_itr->ta0;
+	__enable_interrupt();
+
+	return 0;
 }
