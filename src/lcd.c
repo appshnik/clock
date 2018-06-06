@@ -4,6 +4,20 @@
 #undef OUT
 #endif
 
+#ifndef CPU_F
+#define CPU_F		20000000UL		/* oscillator frequency */
+/** IMPORTANT!: CPU frequency must be greater or equal to 10 MHz otherwise
+ *  __delay_us(us) macro will be equal to 0. If you use CPU_F less then 10 MHz
+ *  you should modify this macro or just substitute it by __delay_ms(ms) macro
+ *  (it will slow process down a little).
+ */
+
+/* function macros */
+#define __delay_ms(ms)	(__delay_cycles((unsigned long)(CPU_F/1000UL * ms)))
+#define __delay_us(us)	(__delay_cycles((unsigned long)(CPU_F/1000000UL * us)))
+
+#endif /* CPU_F */
+
 /************** LCD pinout settings *************************************/
 #ifndef BUS_WIDTH
 #define BUS_WIDTH	4	/* LCD's data bus width (8/4 bits) */

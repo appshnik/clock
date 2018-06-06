@@ -4,18 +4,18 @@
 #include <sb.h>
 #include <rtc.h>
 
-#define TA_CNT		(615)			/* number of TA0 cycles ~2 sec*/
+#define TA_CNT		615			/* number of TA0 cycles ~2 sec*/
 
 /* IO definition */
-#define PREV_B		(1<<0)			/* "prev" button */
-#define UP_B		(1<<1)			/* "up" button */
-#define DOWN_B		(1<<2)			/* "down" button */
-#define NEXT_B		(1<<3)			/* "next" button */
+#define PREV_B		1<<0			/* "prev" button */
+#define UP_B		1<<1			/* "up" button */
+#define DOWN_B		1<<2			/* "down" button */
+#define NEXT_B		1<<3			/* "next" button */
 #define KEY_MSK		(PREV_B | \
 			UP_B | \
 			DOWN_B | \
 			NEXT_B)			/* keyboard mask */
-#define SB_MSK		(0x08)			/* single bus pin mask */
+#define SB_MSK		0x08			/* single bus pin mask */
 
 /* event definition */
 #define PREV		(~P1IN & PREV_B)	/* "prev" button is pressed */
