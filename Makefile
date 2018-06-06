@@ -1,31 +1,28 @@
 INCLUDES	= -Iinclude
 DEFINES		= -D__STDC_VERSION__=199401L
 
-CROSS_COMPILE	= msp430-
+CROSS_COMPILE	?= msp430-
 CC		= $(CROSS_COMPILE)gcc
 LD		= $(CROSS_COMPILE)gcc
-OBJ_DMP		= $(CROSS_COMPILE)objdump
+OBJDUMP		= $(CROSS_COMPILE)objdump
 MCU		= msp430g2553
-MMCU		= -mmcu=$(MCU)
 
 CFLAGS		= -Wall -Os
 CFLAGS		+= -MD -pedantic -ansi -Werror -Wextra
 CFLAGS		+= $(INCLUDES)
 CFLAGS		+= $(DEFINES)
 
-LDFLAGS		= -Wall $(MMCU)
+LDFLAGS		= -mmcu=$(MCU)
 
 OBJS		= src/board.o \
-		  src/main.o \
+		  src/i2c_bus.o \
 		  src/lcd.o \
-		  src/sb.o \
+		  src/main.o \
 		  src/rtc.o \
-		  src/TI_USCI_I2C_master.o
+		  src/sb.o
 
 OUTELF		= clock.elf
 OUTLST		= clock.lst
-MCUDBG		= mspdebug
-DRV		= rf2500
 
 MSP430_INC	= -I/usr/msp430/include -I/usr/lib/gcc/msp430/4.6.3/include
 MSP430_DEF	= -D__MSP430G2553__
@@ -35,32 +32,31 @@ CPPCHECK_FLAGS	= --enable=all $(MSP430_CFLAGS) $(INCLUDES) $(DEFINES)
 CPPCHECK_FLAGS	+= --inline-suppr -D__STDC__
 
 default: $(OBJS)
-	@echo [LD] $(OUTELF)
+	@echo LD $(OUTELF)
 	@$(LD) $(LDFLAGS) -o $(OUTELF) $^
-	@echo [OBJ_DMP] $(OUTLST)
-	@$(OBJ_DMP) -DS $(OUTELF) > $(OUTLST)
 
 %.o: %.c
-	@echo [CC] $<
-	@$(CC) -c $< $(MMCU) -o $@ $(CFLAGS)
+	@echo CC $<
+	@$(CC) -c $< -mmcu=$(MCU) -o $@ $(CFLAGS)
 
 ctags:
 	@ctags $(OBJS:.o=.c)
 
+dump: $(OUTELF)
+	@echo OBJDUMP $(OUTLST)
+	@$(OBJDUMP) -DS $(OUTELF) > $(OUTLST)
+
 flash: $(OUTELF)
-	$(MCUDBG) $(DRV) "prog $(OUTELF)"
+	mspdebug rf2500 "prog $(OUTELF)"
 
 clean:
 	@-rm -rf $(OUTELF) $(OUTLST) tags
 	@-rm -f $(OBJS)
 	@-rm -f $(OBJS:.o=.d)
 
-distclean:
-	@make clean
-
 _check_sparse:
 	@echo "---> Checking with sparse..."
-	@find . -type f -name '*.{c,h}' -exec sparse $(SPARSE_FLAGS) {} \;
+	@find . -type f -name '*.[ch]' -exec sparse $(SPARSE_FLAGS) {} \;
 	@echo
 
 _check_cppcheck:

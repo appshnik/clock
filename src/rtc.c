@@ -1,20 +1,18 @@
 #include <common.h>
-#include <TI_USCI_I2C_master.h>
+#include <i2c_bus.h>
 #include <rtc.h>
 
-#define RTC_ADDR	(0x68)		/* RTC modules I2C bus address */
-#define RTC_BR_DIV	(250)		/* Divider for baud-rate calculation */
-
-
+#define RTC_ADDR	0x68		/* RTC module's I2C bus address */
+#define RTC_BR_DIV	250		/* Divider for baud-rate calculation */
 
 /* Global variables*/
-uint8_t rtc_buf[5];
+static uint8_t rtc_buf[5];
 
-uint8_t rtc_time[] = {0x00};
-uint8_t rtc_date[] = {0x04};
-uint8_t rtc_timer[] = {0x07};
-uint8_t rtc_al_contr[] = {0x0E};
-uint8_t rtc_al_st[] = {0x0F};
+static uint8_t rtc_time[] = {0x00};
+static uint8_t rtc_date[] = {0x04};
+static uint8_t rtc_timer[] = {0x07};
+static uint8_t rtc_al_contr[] = {0x0E};
+static uint8_t rtc_al_st[] = {0x0F};
 
 uint8_t bcd_to_int(uint8_t bcd)
 {
@@ -36,50 +34,44 @@ uint8_t int_to_bcd(uint8_t val)
 }
 
 /* checks if there is a slave with given address on the bus */
-int rtc_check(uint8_t addr)
+static int rtc_check(uint8_t addr)
 {
-	TI_USCI_I2C_transmitinit(addr, RTC_BR_DIV);
-	while (TI_USCI_I2C_notready());
-	if (TI_USCI_I2C_slave_present(addr))
-		return 1;	/* slave exists */
-	else
-		return 0;	/* slave doesn't exist */
+	i2c_transmitinit(addr, RTC_BR_DIV);
+	while (i2c_busy());
+	return i2c_check_slave(addr);
 }
 /* read given amount of bytes b_cnt to rtc_buf
 from specified RTC register rtc_reg*/
-int rtc_read(uint8_t b_cnt, uint8_t *rtc_reg)
+static int rtc_read(uint8_t b_cnt, uint8_t *rtc_reg)
 {
-	if (rtc_check(RTC_ADDR)) {
-		/* write register pointer to RTC */
-		TI_USCI_I2C_transmitinit(RTC_ADDR, RTC_BR_DIV);
-		TI_USCI_I2C_transmit(1, rtc_reg);
-		while (TI_USCI_I2C_notready());
-
-		TI_USCI_I2C_receiveinit(RTC_ADDR, RTC_BR_DIV);
-		while (TI_USCI_I2C_notready());
-		TI_USCI_I2C_receive(b_cnt, rtc_buf);
-		while (TI_USCI_I2C_notready());
-
-		return 1;
-	}
-	else
+	if (!rtc_check(RTC_ADDR))
 		return 0;
+
+	/* write register pointer to RTC */
+	i2c_transmitinit(RTC_ADDR, RTC_BR_DIV);
+	i2c_transmit(1, rtc_reg);
+	while (i2c_busy());
+
+	i2c_receiveinit(RTC_ADDR, RTC_BR_DIV);
+	while (i2c_busy());
+	i2c_receive(b_cnt, rtc_buf);
+	while (i2c_busy());
+	return 1;
 }
+
 /* write given amount of bytes b_cnt from rtc_buf
 to specified RTC register rtc_reg*/
-int rtc_write(uint8_t b_cnt, uint8_t *rtc_reg)
+static int rtc_write(uint8_t b_cnt, const uint8_t *rtc_reg)
 {
 	rtc_buf[0] = *rtc_reg;
-	if (rtc_check(RTC_ADDR)) {
-		/* write register pointer to RTC */
-		TI_USCI_I2C_transmitinit(RTC_ADDR, RTC_BR_DIV);
-		TI_USCI_I2C_transmit(b_cnt, rtc_buf);
-		while (TI_USCI_I2C_notready());
-
-		return 1;
-	}
-	else
+	if (!rtc_check(RTC_ADDR))
 		return 0;
+
+	/* write register pointer to RTC */
+	i2c_transmitinit(RTC_ADDR, RTC_BR_DIV);
+	i2c_transmit(b_cnt, rtc_buf);
+	while (i2c_busy());
+	return 1;
 }
 
 /* write current time to RTC */
@@ -128,6 +120,7 @@ void rtc_write_timer(void)
 		rtc_write(2, rtc_al_contr);
 	}
 }
+
 /* write alarm acknowledgement to RTC */
 void rtc_write_ack(void)
 {
@@ -135,6 +128,7 @@ void rtc_write_ack(void)
 
 	rtc_write(2, rtc_al_st);
 }
+
 /* write alarm switch off command to RTC */
 void rtc_write_stop_alarm(void)
 {
@@ -142,35 +136,35 @@ void rtc_write_stop_alarm(void)
 
 	rtc_write(2, rtc_al_contr);
 }
-/* calculate timer remain */
-void rtc_timer_remain()
-{
-	unsigned long int now_s = time.hh * 360 + time.mm * 60 + time.ss;
-	unsigned long int alm_s = alarm.hh * 360 + alarm.mm * 60 + alarm.ss;
-	unsigned long int day = 86339;
-	unsigned long int rem_s;
-	/* calculate remaining time in seconds */
-	if (now_s > alm_s)
-		rem_s = day - now_s + alm_s;
-	else
-		rem_s = alm_s - now_s;
 
-	remain.ss = rem_s % 60;
-	rem_s = rem_s / 60;
-	remain.mm = rem_s % 60;
-	rem_s = rem_s / 60;
-	remain.hh = rem_s;
+/* calculate timer remain */
+static void rtc_timer_remain(void)
+{
+	unsigned long int now_s = time.hh * 3600L + time.mm * 60 + time.ss;
+	unsigned long int alm_s = alarm.hh * 3600L + alarm.mm * 60 + alarm.ss;
+	unsigned long int rem_s = 86400L - now_s + alm_s;
+
+
+	if (!remain.state) {
+		remain.ss = rem_s % 60;
+		remain.mm = (rem_s / 60) % 60;
+		remain.hh = ((rem_s / 60) /60) % 24;
+	} else {
+		remain.ss = 0;
+		remain.mm = 0;
+		remain.hh = 0;
+	}
 }
+
 /* get RTC timer state */
 void rtc_get_timer_st(void)
 {
 	if (rtc_read(1, rtc_al_st)) {
 		remain.state = rtc_buf[0] & 0x01;
 	}
-	if (!remain.state) {
-		rtc_timer_remain();
-	}
+	rtc_timer_remain();
 }
+
 /* get current RTC time */
 void rtc_get_time(void)
 {
@@ -178,8 +172,7 @@ void rtc_get_time(void)
 		time.hh = bcd_to_int(rtc_buf[2] & 0x3F);
 		time.mm = bcd_to_int(rtc_buf[1]);
 		time.ss = bcd_to_int(rtc_buf[0]);
-	}
-	else {
+	} else {
 		time.hh = 99;
 		time.mm = 99;
 		time.ss = 99;
@@ -189,16 +182,14 @@ void rtc_get_time(void)
 /* get current RTC date */
 void rtc_get_date(void)
 {
-	uint8_t bcd_mth = 0;
-	if (rtc_read(3, rtc_date)) {
-		bcd_mth = rtc_buf[1];
 
+	if (rtc_read(3, rtc_date)) {
+		uint8_t bcd_mth = rtc_buf[1];
 		date.mth = bcd_to_int(bcd_mth & 0x1F);
 		date.dd = bcd_to_int(rtc_buf[0]);
 		date.yy = (int)(bcd_to_int(rtc_buf[2])) + \
 			  ((bcd_mth & 0x80)?(2000):(1900));
-	}
-	else {
+	} else {
 		date.yy = 99;
 		date.mth = 99;
 		date.dd = 99;
