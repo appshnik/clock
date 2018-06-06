@@ -1,4 +1,3 @@
-#include <common.h>
 #include <lcd.h>
 
 #ifdef OUT
@@ -43,14 +42,9 @@
 					if LCD doesn't work properly - try to
 					increase this value */
 
-#define _function_set_i	(0x38)
+/* LCD setting instructions (are used during initialization only) */
+#define _function_set_i	0x38
 #define _function_set	(BUS_WIDTH == 8) ? (0x38) : (0x28)
-#define _display_clear	(0x01)
-#define _display_off	(0x08)
-#define _display_on	(0x0C)
-#define _cursor_on	(0x0F)
-#define _entry_mode_set	(0x06)
-#define _set_ddram(adr)	(0x80 | (adr))
 
 #define cat(f, s)	f ## s
 #define xcat(a, b)	cat(a, b)
@@ -124,21 +118,21 @@ void lcd_write(unsigned char val)
 		__delay_us(_delay);
 		_E(1);
 		if (BUS_WIDTH == 8)
-		LCD_B_OUT |=  ((((val & (1<<7))?(1):(0))<<LCD_D7 | \
-			 	((val & (1<<6))?(1):(0))<<LCD_D6 | \
-			 	((val & (1<<5))?(1):(0))<<LCD_D5 | \
-			 	((val & (1<<4))?(1):(0))<<LCD_D4 | \
-			 	((val & (1<<3))?(1):(0))<<LCD_D3 | \
-			 	((val & (1<<2))?(1):(0))<<LCD_D2 | \
-			 	((val & (1<<1))?(1):(0))<<LCD_D1 | \
-			 	((val & (1<<0))?(1):(0))<<LCD_D0) & LCD_B_MSK);
+			LCD_B_OUT |=  ((((val & (1<<7))?(1):(0))<<LCD_D7 | \
+			 		((val & (1<<6))?(1):(0))<<LCD_D6 | \
+				 	((val & (1<<5))?(1):(0))<<LCD_D5 | \
+				 	((val & (1<<4))?(1):(0))<<LCD_D4 | \
+				 	((val & (1<<3))?(1):(0))<<LCD_D3 | \
+				 	((val & (1<<2))?(1):(0))<<LCD_D2 | \
+				 	((val & (1<<1))?(1):(0))<<LCD_D1 | \
+				 	((val & (1<<0))?(1):(0))<<LCD_D0) & \
+					LCD_B_MSK);
 		else if (BUS_WIDTH == 4)
-		LCD_B_OUT |=  ((((val & (1<<7))?(1):(0))<<LCD_D7 | \
-			 	((val & (1<<6))?(1):(0))<<LCD_D6 | \
-			 	((val & (1<<5))?(1):(0))<<LCD_D5 | \
-			 	((val & (1<<4))?(1):(0))<<LCD_D4 ) & LCD_B_MSK);
-
-
+			LCD_B_OUT |=  ((((val & (1<<7))?(1):(0))<<LCD_D7 | \
+				 	((val & (1<<6))?(1):(0))<<LCD_D6 | \
+				 	((val & (1<<5))?(1):(0))<<LCD_D5 | \
+				 	((val & (1<<4))?(1):(0))<<LCD_D4 ) & \
+					LCD_B_MSK);
 		__delay_us(_delay);
 		_E(0);
 		__delay_us(_delay);
@@ -263,4 +257,3 @@ void lcd_init(void)
 	lcd_wr_instr(_set_ddram(0x00));
 	__delay_ms(10);
 }
-
