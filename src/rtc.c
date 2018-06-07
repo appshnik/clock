@@ -13,6 +13,28 @@ static uint8_t rtc_date[] = {0x04};
 static uint8_t rtc_timer[] = {0x07};
 static uint8_t rtc_al_contr[] = {0x0E};
 static uint8_t rtc_al_st[] = {0x0F};
+<<<<<<< HEAD
+=======
+
+uint8_t bcd_to_int(uint8_t bcd)
+{
+	int value;
+	uint8_t msn = (bcd >> 4) & 0x0F;
+	uint8_t lsn = bcd & 0x0F;
+
+	value = 10 * msn + lsn;
+
+	return value;
+}
+
+uint8_t int_to_bcd(uint8_t val)
+{
+	if (val <= 99)
+		return ((val / 10) << 4) | (val % 10);
+	else
+		return 0;
+}
+>>>>>>> 407aa6d2d0a41791b9d5ee03d9d428707aa2743e
 
 /* checks if there is a slave with given address on the bus */
 static int rtc_check(uint8_t addr)
