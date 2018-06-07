@@ -20,6 +20,9 @@ OBJS		= src/board.o \
 		  src/lcd.o \
 		  src/main.o \
 		  src/one_wire.o \
+		  src/i2c_bus.o \
+		  src/lcd.o \
+		  src/main.o \
 		  src/rtc.o \
 		  src/sb.o
 
