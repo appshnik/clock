@@ -127,59 +127,6 @@ void init_device(void)
 	__enable_interrupt();
 }
 
-/* write next less significant bit */
-void wr_next_bit(signed char bit, uint8_t *byte, uint8_t bit_cnt)
-{
-	if (bit)
-		*byte |= 1;
-	else
-		*byte &= ~1;
-	/* shift byte for next writing */
-	if (bit_cnt % 8 < 7)
-		*byte = *byte << 1;
-}
-
-/* port 2 interrupt service routine */
-__attribute__((interrupt(PORT2_VECTOR)))
-/* cppcheck-suppress unusedFunction */
-void p2_isr(void)
-{
-	/* temperature and humidity data reading */
-	signed char bit;
-	if (P2IFG & SB_MSK) {
-		bit = sb_get_bit();
-		/* ignore first short impulse from sensor */
-		if (bit < 0 && bit_count == 0)
-			goto p2_isr_end;
-		if ((bit >= 0)) {
-			switch(bit_count / 8) {
-			case 0	:
-				wr_next_bit(bit, &(ht_data.hum_h), bit_count);
-				break;
-			case 1	:
-				wr_next_bit(bit, &(ht_data.hum_l), bit_count);
-				break;
-			case 2	:
-				wr_next_bit(bit, &(ht_data.temp_h), bit_count);
-				break;
-			case 3	:
-				wr_next_bit(bit, &(ht_data.temp_l), bit_count);
-				break;
-			case 4	:
-				wr_next_bit(bit, &(ht_data.ch_sum), bit_count);
-				break;
-			}
-		}
-		bit_count++;
-		if ((bit_count >= 40) || (bit < 0)) {
-			bit_count = 0;
-			P2IE &= ~SB_MSK;
-		}
-	p2_isr_end:
-		P2IFG = P2IFG & ~SB_MSK;
-	}
-}
-
 /* TimerA interrupt service routine */
 __attribute__((interrupt(TIMER0_A1_VECTOR)))
 /* cppcheck-suppress unusedFunction */

@@ -6,13 +6,14 @@
 #include <string.h>
 #include <stdbool.h>
 
+/* one wire bus received data buffer */
+typedef bool (*ow_buf)[];
+
 /* function definitions */
 void one_wire_start(void);
 uint8_t one_wire_resp(void);
 signed char one_wire_receive(void);
-signed char one_wire_get_bit(void);
-signed char one_wire_read_data(uint16_t bit_number);
-
-extern bool rcv_buf[sizeof(uint8_t)*10];
+void one_wire_get_bit(void *param);
+bool *one_wire_read_data(uint16_t bit_number);
 
 #endif /* ONE_WIRE_H */

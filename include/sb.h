@@ -4,13 +4,6 @@
 #include <stdint.h>
 
 /* function definitions */
-void sb_start(void);
-uint8_t sb_resp(void);
-signed char sb_receive(void);
-signed char sb_get_bit(void);
-signed char sb_read_data(void);
-
-/* variables definitions*/
-extern signed char ht_res;
+void sb_receive(void);
 
 #endif /* SB_H */

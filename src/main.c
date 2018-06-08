@@ -3,6 +3,8 @@
 #include <lcd.h>
 #include <sb.h>
 #include <rtc.h>
+#include <itrc.h>
+#include <one_wire.h>
 
 #define _val(var)	((var)>=10)?(""):("0"), (var)
 
@@ -28,6 +30,9 @@ int main(void)
 	lcd_wr_str("Initialization..", 0x40);
 	__delay_ms(500UL);
 
+	/* init callbacks */
+	set_cb(&p2_isr_cb, one_wire_get_bit, NULL);
+
 	rtc_write_ack();
 
 	/* main program loop */
@@ -36,7 +41,7 @@ int main(void)
 
 		/* data reading from HT sensor */
 		if (sb_rec_oper) {
-			ht_res = sb_read_data();
+			sb_receive();
 			sb_rec_oper = 0;
 		}
 		/* data writing to RTC */
@@ -68,9 +73,9 @@ int main(void)
 		switch (c_scr) {
 		/* humidity/temperature screen */
 		case HT_SCR:
-			if (ht_res == -1)
+			if (0)
 				lcd_wr_scr("Sensor error", 0x42);
-			else if (ht_res)
+			else if (0)
 				lcd_wr_scr("Data error", 0x43);
 			else {
 				sprintf(top_str, \

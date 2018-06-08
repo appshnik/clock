@@ -1,4 +1,3 @@
-/*#include <common.h>*/
 #include <one_wire.h>
 
 #ifdef OUT
@@ -48,11 +47,17 @@
 #define _SET_SB_OUT(x)	(x) ? (SB_OUT |= SB_MSK) : (SB_OUT &= ~SB_MSK)
 #define _SB_STATE	(SB_IN & SB_MSK)
 
+
 static uint16_t bit_count;	/* number of already received bits */
+uint16_t *p_bit_count = &bit_count;
 
-static uint16_t tar_val;	/* microseconds */
+static bool buffer[8*16];	/* buffer for received data */
 
-
+/*8888888888888888888888*/
+#include <lcd.h>
+#include <stdio.h>
+char deb_str[17];
+/*8888888888888888888888*/
 
 /* interrupt service routine for SB pin */
 /**
@@ -127,27 +132,54 @@ signed char one_wire_receive(void)
 	return (failed = 0);
 }
 
+/* write next less significant bit */
+void wr_next_bit(signed char bit, uint8_t *byte, uint8_t bit_cnt)
+{
+	if (bit)
+		*byte |= 1;
+	else
+		*byte &= ~1;
+	/* shift byte for next writing */
+	if (bit_cnt % 8 < 7)
+		*byte = *byte << 1;
+}
+
 /**
   * Function is used to receive next bit from sensor. It is called in port ISR.
   */
-signed char one_wire_get_bit(void)
+void one_wire_get_bit(void *param)
 {
+	char *par = param;
+	signed char bit;
+	uint16_t tar_val;	/* microseconds expired */
+
+	*par += 1;
+
 	/* set TimerA to zero */
 	TACTL |= TACLR;
 	/* wait until high-low transition */
 	while (SB_IN & SB_MSK);
 	/* compare TAR with predefined values and return corresponding value */
 	tar_val = (unsigned int)(TAR) / TA_FAC;
-	if ( tar_val >= ONE_MIN_TIME && tar_val <= ONE_MAX_TIME)
-		return 1;
-	else if ( tar_val >= ZERO_MIN_TIME && tar_val <= ZERO_MAX_TIME)
-		return 0;
+	if (tar_val >= ONE_MIN_TIME && tar_val <= ONE_MAX_TIME)
+		bit = 1;
+	else if (tar_val >= ZERO_MIN_TIME && tar_val <= ZERO_MAX_TIME)
+		bit = 0;
 	else
-		return -1;
+		bit = -1;
+	/* ignore first short impulse from sensor */
+	if (bit < 0)
+		goto _end;
+	if (bit >= 0) {
+		buffer[*p_bit_count] = bit;
+	}
+_end:
+	*p_bit_count = *p_bit_count + 1;
+
 }
 
 /* Data receiving routine */
-signed char one_wire_read_data(uint16_t bit_number)
+bool *one_wire_read_data(uint16_t bit_number)
 {
 	/* struct to hold previous interrupts settings */
 	struct p_itr_set {
@@ -159,6 +191,8 @@ signed char one_wire_read_data(uint16_t bit_number)
 	struct p_itr_set *p_itr = &itr;
 	memset(p_itr, 0, sizeof(itr));
 
+	bit_count = 0;
+
 	__disable_interrupt();
 	/* save interrupt settings and disable unwanted one's */
 	p_itr->p1 = P1IE;
@@ -169,23 +203,38 @@ signed char one_wire_read_data(uint16_t bit_number)
 	IE1 = 0x0;
 	p_itr->ta0 = TACTL;
 	TACTL = TACTL & ~TAIE;
+/*
+	sprintf(deb_str, "%x", (int)TACTL);
+	lcd_wr_str(deb_str, 0x00);
+*/
 	/* send start signal to sensor */
 	one_wire_start();
 	/* check if sensor has responded */
 	if (one_wire_resp()) {
 		/* start bit reading sequence */
-		bit_count = 0;
 		__enable_interrupt();
-		while (bit_count < bit_number);
+/*		while (*p_bit_count < bit_number);
+*/
+		{unsigned long int i;
+		for (i = 0; i <= 4200000000UL; i++);}
 	} else {
-		return -1;
+		return NULL;
 	}
+
+	bit_number += 0;
+	__disable_interrupt();
+	sprintf(deb_str, "P2IE: %x", P2IE);
+	lcd_wr_str(deb_str, 0x00);
+	sprintf(deb_str, "bit_count   %d", (int)bit_count);
+	lcd_wr_str(deb_str, 0x40);
 	/* restore interrupt settings */
+	P2IE = p_itr->p2 & ~SB_MSK;
 	P1IE = p_itr->p1;
-	P2IE = p_itr->p2;
 	IE1 = p_itr->wdt;
 	TACTL = p_itr->ta0;
 	__enable_interrupt();
 
-	return 0;
+	while (1);
+
+	return buffer;
 }
