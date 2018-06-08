@@ -112,38 +112,6 @@ uint8_t one_wire_resp(void)
 	return res;
 }
 
-signed char one_wire_receive(void)
-{
-	uint8_t itr;		/* holder for previous interrupt settings */
-	static uint8_t failed;	/* counter for invalid data transitions */
-
-	itr = SB_IE;
-	bit_count = 0;
-
-	/* enable sufficient interrupt */
-	TACTL = TACTL & ~TAIE;
-	SB_IE = SB_MSK;
-	/* wait while reading */
-	__delay_ms(100);
-	/* restore interrupt settings */
-	SB_IE = itr;
-	TACTL = TACTL | TAIE;
-
-	return (failed = 0);
-}
-
-/* write next less significant bit */
-void wr_next_bit(signed char bit, uint8_t *byte, uint8_t bit_cnt)
-{
-	if (bit)
-		*byte |= 1;
-	else
-		*byte &= ~1;
-	/* shift byte for next writing */
-	if (bit_cnt % 8 < 7)
-		*byte = *byte << 1;
-}
-
 /**
   * Function is used to receive next bit from sensor. It is called in port ISR.
   */
@@ -175,7 +143,6 @@ void one_wire_get_bit(void *param)
 	}
 _end:
 	*p_bit_count = *p_bit_count + 1;
-
 }
 
 /* Data receiving routine */
@@ -198,11 +165,10 @@ bool *one_wire_read_data(uint16_t bit_number)
 	p_itr->p1 = P1IE;
 	P1IE = 0x0;
 	p_itr->p2 = P2IE;
-	P2IE = 0x0 | SB_MSK;
+	P2IE = SB_MSK;
 	p_itr->wdt = IE1;
 	IE1 = 0x0;
-	p_itr->ta0 = TACTL;
-	TACTL = TACTL & ~TAIE;
+
 /*
 	sprintf(deb_str, "%x", (int)TACTL);
 	lcd_wr_str(deb_str, 0x00);
@@ -232,9 +198,6 @@ bool *one_wire_read_data(uint16_t bit_number)
 	P1IE = p_itr->p1;
 	IE1 = p_itr->wdt;
 	TACTL = p_itr->ta0;
-	__enable_interrupt();
-
-	while (1);
 
 	return buffer;
 }

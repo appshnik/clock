@@ -65,8 +65,8 @@ void gpio_init(void)
 
 	P2IES = 0x00;
 	P2IE = 0x00;
-	P2SEL &= ~SB_MSK;
-	P2SEL2 &= ~SB_MSK;
+	P2SEL = 0x00;
+	P2SEL2 = 0x00;
 
 }
 /* Timer A initialization */
@@ -74,7 +74,6 @@ void ta_init(void)
 {
 	TACTL = TASSEL_2;		/* SMCLK is used as clock source */
 	TACTL |= MC_2;			/* continuous mode */
-	TACTL |= TAIE;			/* enable interrupt request */
 }
 
 /* variables initialization */
@@ -121,132 +120,6 @@ void init_device(void)
 	wdt_init();
 	mclk_init();
 	gpio_init();
-	usci_init();
 	ta_init();
-	var_init();
 	__enable_interrupt();
-}
-
-/* TimerA interrupt service routine */
-__attribute__((interrupt(TIMER0_A1_VECTOR)))
-/* cppcheck-suppress unusedFunction */
-void ta0_isr(void)
-{
-	static int sb_wait_cnt;
-
-	TACTL = TACTL & ~TAIFG;
-	/* waiting for the time to read from HT sensor*/
-
-	if (sb_wait_cnt < TA_CNT) {
-		sb_wait_cnt += 1;
-	}
-	else {
-		sb_wait_cnt = 0;
-		sb_rec_oper = 1;
-	}
-}
-
-/* port 1 interrupt service routine */
-__attribute__((interrupt(PORT1_VECTOR)))
-/* cppcheck-suppress unusedFunction */
-void p1_isr(void)
-{
-	uint8_t max_ind;
-
-	/* maximum index value in current screen */
-	if (c_scr == 3)
-		max_ind = sizeof(dt_curs)/sizeof(uint8_t) - 1;
-	else if (c_scr == 5)
-		max_ind = sizeof(t_curs)/sizeof(uint8_t) - 1;
-	else
-		max_ind = 0;
-
-	__delay_ms(300);	/* to avoid bouncing */
-
-	/* acknowledge alarm */
-	if (timer.state && remain.state) {
-		P1IFG &= ~KEY_MSK;
-		timer.state = 0;
-		remain.state = 0;
-		dt_ch |= AL_ACK;
-		goto p1_isr_end;
-	}
-#if 0	/* this section avoids screen #1 due to it's absence */
-	if (((P1IFG & UP_B) || (P1IFG & DOWN_B)) && (c_scr == 0)) {
-		P1IFG = P1IFG & ~UP_B;
-		P1IFG = P1IFG & ~DOWN_B;
-		goto p1_isr_end;
-	}
-#endif
-
-	/* screen navigation */
-	if (P1IFG & PREV_B) {
-		if (c_scr%2 == 0)
-			c_scr = (c_scr == HT_SCR)?(T_SCR):(c_scr - 2);
-		else {
-			if (c_ind == 0) {
-				c_scr -= 1;
-				lcd_wr_instr(_display_on);
-			}
-			else
-				c_ind -= 1;
-		}
-		P1IFG = P1IFG & ~PREV_B;
-	}
-	else if (P1IFG & NEXT_B) {
-		if (c_scr%2 == 0)
-			c_scr = (c_scr == T_SCR)?(HT_SCR):(c_scr + 2);
-		else {
-			if (c_ind == max_ind) {
-				c_scr -= 1;
-				lcd_wr_instr(_display_on);
-			}
-			else
-				c_ind += 1;
-		}
-		P1IFG = P1IFG & ~NEXT_B;
-	}
-	else if (P1IFG & UP_B) {
-		/* go to corresponding setup screen */
-		if (c_scr%2 == 0) {
-			c_scr += 1;
-			c_ind = 0;
-			lcd_wr_instr(_cursor_on);
-		}
-		else if (c_scr == DTS_SCR) {
-			*(dt_ptr[c_ind]) += 1;	/* increment parameter */
-			if (c_ind <= 2)
-				dt_ch |= DS_CHANGED;
-			else
-				dt_ch |= TS_CHANGED;
-		}
-		else if (c_scr == TS_SCR) {
-			*(t_ptr[c_ind]) += 1;	/* increment parameter */
-			if (c_ind == 3)
-				dt_ch |= TMS_CHANGED;
-		}
-		P1IFG = P1IFG & ~UP_B;
-	}
-	else if (P1IFG & DOWN_B) {
-		/* go to corresponding setup screen */
-		if (c_scr%2 == 0) {
-			c_scr += 1;
-			c_ind = 0;
-			lcd_wr_instr(_cursor_on);
-		}
-		else if (c_scr == DTS_SCR) {
-			*(dt_ptr[c_ind]) -= 1;	/* decrement parameter */
-			if (c_ind <= 2)
-				dt_ch |= DS_CHANGED;
-			else
-				dt_ch |= TS_CHANGED;
-		}
-		else if (c_scr == TS_SCR) {
-			*(t_ptr[c_ind]) -= 1;	/* decrement parameter */
-			if (c_ind == 3)
-				dt_ch |= STOP_ALARM;
-		}
-		P1IFG = P1IFG & ~DOWN_B;
-	}
-p1_isr_end:;
 }
