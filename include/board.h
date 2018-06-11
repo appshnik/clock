@@ -9,6 +9,8 @@
 #define DTS_SCR		3			/* d/t set screen number */
 #define TS_SCR		5			/* timer set screen number */
 
+#define TEMP_INT_PIN	3
+
 /* function definitions */
 void init_device(void);
 

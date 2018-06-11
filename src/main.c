@@ -23,7 +23,7 @@ int main(void)
 
 	__disable_interrupt();
 	/* init callbacks */
-	set_cb(&p2_isr_cb, one_wire_get_bit, NULL);
+	intc_set_cb(ow_read, TEMP_INT_PIN, NULL);
 	/* main program loop */
 	while (1) {
 
