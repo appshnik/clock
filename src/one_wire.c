@@ -49,9 +49,8 @@
 
 
 static uint16_t bit_count;	/* number of already received bits */
-uint16_t *p_bit_count = &bit_count;
 
-static bool buffer[8*16];	/* buffer for received data */
+static bool buffer[8*5];	/* buffer for received data */
 
 /*8888888888888888888888*/
 #include <lcd.h>
@@ -132,26 +131,20 @@ void one_wire_get_bit(void *param)
 	signed char bit = 0;
 	uint16_t tar_val = 0;	/* microseconds expired */
 
-	static int j;
-
 	*par += 0;	/* DELETE AFTER */
 	bit += 0;
 	tar_val += 0;
 
 	/* set TimerA to zero */
 	TACTL |= TACLR;
-	sprintf(deb_str, "P2DIR: %x", P2DIR);
-	lcd_wr_str(deb_str, 0x00);
-	sprintf(deb_str, "P2IN:%x P2OUT:%x", P2IN, P2OUT);
-	lcd_wr_str(deb_str, 0x40);
+
 	/* wait until high-low transition */
-	while (P2IN & 0x08);
-#if 0
+	if (bit_count < 40)
+		while (P2IN & 0x08);
+
 	/* compare TAR with predefined values and return corresponding value */
 	tar_val = (unsigned int)(TAR) / TA_FAC;
-/*888888888888888888888888888888*/
-	j++;
-/*888888888888888888888888888888*/
+
 	if (tar_val >= ONE_MIN_TIME && tar_val <= ONE_MAX_TIME)
 		bit = 1;
 	else if (tar_val >= ZERO_MIN_TIME && tar_val <= ZERO_MAX_TIME)
@@ -159,72 +152,51 @@ void one_wire_get_bit(void *param)
 	else
 		bit = -1;
 	/* ignore first short impulse from sensor */
-	if (bit < 0)
+	if (bit < 0 || bit_count >= 40)
 		goto _end;
 	if (bit >= 0) {
-		buffer[*p_bit_count] = bit;
+		buffer[bit_count++] = bit;
 	}
 _end:
-#endif
-	*p_bit_count = j++;
+	;
 }
 
 /* Data receiving routine */
 bool *one_wire_read_data(uint16_t bit_number)
 {
-	/* struct to hold previous interrupts settings */
-	struct p_itr_set {
-		uint8_t p1;
-		uint8_t p2;
-		uint8_t wdt;
-		uint8_t ta0;
-	} itr;
-	struct p_itr_set *p_itr = &itr;
-	memset(p_itr, 0, sizeof(itr));
-
+	int i;
 	bit_count = 0;
-
-	__disable_interrupt();
-	/* save interrupt settings and disable unwanted one's */
-	p_itr->p1 = P1IE;
-	P1IE = 0x0;
-	p_itr->p2 = P2IE;
-	P2IE = 0x08;
-	p_itr->wdt = IE1;
-	IE1 = 0x0;
-
-/*
-	sprintf(deb_str, "%x", (int)TACTL);
-	lcd_wr_str(deb_str, 0x00);
+/*	sprintf(deb_str, "Trying to get...");
+	lcd_wr_str(deb_str, 0x40);
 */
+	P2IE = P2IE | 0x08;
+
 	/* send start signal to sensor */
 	one_wire_start();
 	/* check if sensor has responded */
 	if (one_wire_resp()) {
 		/* start bit reading sequence */
 		__enable_interrupt();
-/*		while (*p_bit_count < bit_number);
+/*		while (bit_count < bit_number);
 */
-	} else {
-		return NULL;
 	}
 /*8888888888888888888888888888888888888888*/
-	__delay_ms(1000);
+	__delay_ms(400);
+	bit_count = 0;
 	__disable_interrupt();
 	bit_number += 0;
-
-	sprintf(deb_str, "%d", bit_count);
-	lcd_wr_str(deb_str, 0x00);
 /*
-	while (1) {
-	for (i = 0; i <= 40; i++) {
-		__delay_ms(1000);
-		sprintf(deb_str, "%d:%u", i, deb_arr1[i]);
-		lcd_wr_str(deb_str, 0x00);
-	}
+	sprintf(deb_str, "bit_count: %d", bit_count);
+	lcd_wr_str(deb_str, 0x00);
+*/
+
+	for (i = 0; i < 40; i++) {
+		sprintf(deb_str, "%2d:%u", i, (int)buffer[i]);
+		lcd_wr_str(deb_str, 0x40);
+		__delay_ms(500);
 	}
 
-
+	/*
 	sprintf(deb_str, "1:%d, 2:%d", deb_arr[0], deb_arr[1]);
 	lcd_wr_str(deb_str, 0x00);
 
@@ -238,11 +210,7 @@ bool *one_wire_read_data(uint16_t bit_number)
 	lcd_wr_str(deb_str, 0x40);
 */
 /*8888888888888888888888888888888888888888*/
-	/* restore interrupt settings */
-	P2IE = p_itr->p2 & ~SB_MSK;
-	P1IE = p_itr->p1;
-	IE1 = p_itr->wdt;
-	TACTL = p_itr->ta0;
+
 
 	return buffer;
 }

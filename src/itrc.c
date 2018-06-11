@@ -1,5 +1,6 @@
 #include <common.h>
 #include <itrc.h>
+#include <one_wire.h>
 
 struct cb_t p2_isr_cb;	/* port 2 ISR callback */
 #if 0
@@ -33,6 +34,8 @@ __attribute__((interrupt(PORT2_VECTOR)))
 void p2_isr(void)
 {
 	if (P2IFG & 0x08)
-		callback(&p2_isr_cb);
+	/*	callback(&p2_isr_cb);
+	*/
+		one_wire_get_bit(NULL);
 	P2IFG = 0x00;
 }

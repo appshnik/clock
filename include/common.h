@@ -36,15 +36,6 @@ struct timer {
 	uint8_t ss; 		/* seconds */
 	uint8_t state;		/* timer state: on/off */
 };
-struct hutemp {
-	uint8_t hum_h;		/* humidity high byte */
-	uint8_t hum_l;		/* humidity low byte */
-	uint8_t temp_h;		/* temperature high byte */
-	uint8_t temp_l;		/* temperature low byte */
-	uint8_t ch_sum;		/* check sum */
-	int hum;		/* current humidity */
-	int temp;		/* current humidity */
-};
 
 /* Function prototypes */
 uint8_t bcd_to_int(uint8_t bcd);
@@ -57,6 +48,5 @@ extern struct timer timer;
 extern struct timer remain;
 extern struct time alarm;
 extern struct date date;
-extern struct hutemp ht_data;
 extern uint8_t sb_rec_oper;
 #endif	/* COMMON_H */
