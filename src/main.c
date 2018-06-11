@@ -8,6 +8,7 @@
 
 int main(void)
 {
+	char str[17];
 	uint8_t sb_rec_oper;	/* data reading is active */
 	/* initialization */
 
@@ -24,9 +25,13 @@ int main(void)
 	while (1) {
 		__delay_ms(2500UL);
 		sb_rec_oper = 1;
+
+		sprintf(str, "bus_st: %x", P2OUT);
+		lcd_wr_str(str, 0x00);
 		/* data reading from HT sensor */
 		if (sb_rec_oper) {
 			sb_receive();
+
 			sb_rec_oper = 0;
 		}
 	}

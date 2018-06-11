@@ -57,6 +57,8 @@ static bool buffer[8*16];	/* buffer for received data */
 #include <lcd.h>
 #include <stdio.h>
 char deb_str[17];
+int deb_arr[20];
+uint16_t deb_arr1[40];
 /*8888888888888888888888*/
 
 /* interrupt service routine for SB pin */
@@ -92,21 +94,30 @@ void one_wire_start(void)
 uint8_t one_wire_resp(void)
 {
 	unsigned char res;
-	int i;
+	int i, j = 0;
 	res = 1;
 	/* wait until sensor responses "low" */
 	i = MAX_RESP_TIME;
 	while (_SB_STATE && i--);
+/*888888888888888888888888888888*/
+	deb_arr[j++] = i;
+/*888888888888888888888888888888*/
 	if (i <= 0)
 		return 0;
 	/* wait until sensor responses "high" */
 	i = MAX_RESP_TIME;
 	while (!_SB_STATE && i--);
+/*888888888888888888888888888888*/
+	deb_arr[j++] = i;
+/*888888888888888888888888888888*/
 	if (i <= 0)
 		return 0;
 	/* wait until sensor starts data transfer */
 	i = MAX_RESP_TIME;
 	while (_SB_STATE && i--);
+/*888888888888888888888888888888*/
+	deb_arr[j++] = i;
+/*888888888888888888888888888888*/
 	if (i <= 0)
 		return 0;
 	return res;
@@ -118,17 +129,29 @@ uint8_t one_wire_resp(void)
 void one_wire_get_bit(void *param)
 {
 	char *par = param;
-	signed char bit;
-	uint16_t tar_val;	/* microseconds expired */
+	signed char bit = 0;
+	uint16_t tar_val = 0;	/* microseconds expired */
 
-	*par += 1;
+	static int j;
+
+	*par += 0;	/* DELETE AFTER */
+	bit += 0;
+	tar_val += 0;
 
 	/* set TimerA to zero */
 	TACTL |= TACLR;
+	sprintf(deb_str, "P2DIR: %x", P2DIR);
+	lcd_wr_str(deb_str, 0x00);
+	sprintf(deb_str, "P2IN:%x P2OUT:%x", P2IN, P2OUT);
+	lcd_wr_str(deb_str, 0x40);
 	/* wait until high-low transition */
-	while (SB_IN & SB_MSK);
+	while (P2IN & 0x08);
+#if 0
 	/* compare TAR with predefined values and return corresponding value */
 	tar_val = (unsigned int)(TAR) / TA_FAC;
+/*888888888888888888888888888888*/
+	j++;
+/*888888888888888888888888888888*/
 	if (tar_val >= ONE_MIN_TIME && tar_val <= ONE_MAX_TIME)
 		bit = 1;
 	else if (tar_val >= ZERO_MIN_TIME && tar_val <= ZERO_MAX_TIME)
@@ -142,7 +165,8 @@ void one_wire_get_bit(void *param)
 		buffer[*p_bit_count] = bit;
 	}
 _end:
-	*p_bit_count = *p_bit_count + 1;
+#endif
+	*p_bit_count = j++;
 }
 
 /* Data receiving routine */
@@ -165,7 +189,7 @@ bool *one_wire_read_data(uint16_t bit_number)
 	p_itr->p1 = P1IE;
 	P1IE = 0x0;
 	p_itr->p2 = P2IE;
-	P2IE = SB_MSK;
+	P2IE = 0x08;
 	p_itr->wdt = IE1;
 	IE1 = 0x0;
 
@@ -181,18 +205,39 @@ bool *one_wire_read_data(uint16_t bit_number)
 		__enable_interrupt();
 /*		while (*p_bit_count < bit_number);
 */
-		{unsigned long int i;
-		for (i = 0; i <= 4200000000UL; i++);}
 	} else {
 		return NULL;
 	}
-
+/*8888888888888888888888888888888888888888*/
+	__delay_ms(1000);
+	__disable_interrupt();
 	bit_number += 0;
+
+	sprintf(deb_str, "%d", bit_count);
+	lcd_wr_str(deb_str, 0x00);
+/*
+	while (1) {
+	for (i = 0; i <= 40; i++) {
+		__delay_ms(1000);
+		sprintf(deb_str, "%d:%u", i, deb_arr1[i]);
+		lcd_wr_str(deb_str, 0x00);
+	}
+	}
+
+
+	sprintf(deb_str, "1:%d, 2:%d", deb_arr[0], deb_arr[1]);
+	lcd_wr_str(deb_str, 0x00);
+
+	sprintf(deb_str, "3:%d", deb_arr[2]);
+	lcd_wr_str(deb_str, 0x40);
+
 	__disable_interrupt();
 	sprintf(deb_str, "P2IE: %x", P2IE);
 	lcd_wr_str(deb_str, 0x00);
 	sprintf(deb_str, "bit_count   %d", (int)bit_count);
 	lcd_wr_str(deb_str, 0x40);
+*/
+/*8888888888888888888888888888888888888888*/
 	/* restore interrupt settings */
 	P2IE = p_itr->p2 & ~SB_MSK;
 	P1IE = p_itr->p1;

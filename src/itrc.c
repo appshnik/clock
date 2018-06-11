@@ -34,5 +34,5 @@ void p2_isr(void)
 {
 	if (P2IFG & 0x08)
 		callback(&p2_isr_cb);
-	P2IFG = P2IFG & 0x00;
+	P2IFG = 0x00;
 }
