@@ -17,13 +17,11 @@ LDFLAGS		= -mmcu=$(MCU)
 OBJS		= src/board.o \
 		  src/common.o \
 		  src/i2c_bus.o \
-		  src/itrc.o \
+		  src/intc.o \
+		  src/keyboard.o \
 		  src/lcd.o \
 		  src/main.o \
-		  src/one_wire.o \
-		  src/i2c_bus.o \
-		  src/lcd.o \
-		  src/main.o \
+		  src/ow.o \
 		  src/rtc.o \
 		  src/sb.o
 

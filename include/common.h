@@ -13,6 +13,8 @@
 #define __delay_ms(ms)	(__delay_cycles((unsigned long)(CPU_F/1000UL * ms)))
 #define __delay_us(us)	(__delay_cycles((unsigned long)(CPU_F/1000000UL * us)))
 
+#define BIT(x)		(1 << (x))
+
 #define DS_CHANGED	0x01			/* data settings changed */
 #define TS_CHANGED	0x02			/* time settings changed */
 #define TMS_CHANGED	0x04			/* timer settings changed */
@@ -36,15 +38,11 @@ struct timer {
 	uint8_t ss; 		/* seconds */
 	uint8_t state;		/* timer state: on/off */
 };
-struct hutemp {
-	uint8_t hum_h;		/* humidity high byte */
-	uint8_t hum_l;		/* humidity low byte */
-	uint8_t temp_h;		/* temperature high byte */
-	uint8_t temp_l;		/* temperature low byte */
-	uint8_t ch_sum;		/* check sum */
-	int hum;		/* current humidity */
-	int temp;		/* current humidity */
-};
+
+typedef struct {
+	uint8_t *port;		/* ports first register (PxIN) address */
+	uint8_t pin;		/* ports pin */
+} port_pin;
 
 /* Function prototypes */
 uint8_t bcd_to_int(uint8_t bcd);
@@ -57,6 +55,5 @@ extern struct timer timer;
 extern struct timer remain;
 extern struct time alarm;
 extern struct date date;
-extern struct hutemp ht_data;
 extern uint8_t sb_rec_oper;
 #endif	/* COMMON_H */

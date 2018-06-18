@@ -10,10 +10,7 @@
 typedef bool (*ow_buf)[];
 
 /* function definitions */
-void one_wire_start(void);
-uint8_t one_wire_resp(void);
-signed char one_wire_receive(void);
-void one_wire_get_bit(void *param);
-bool *one_wire_read_data(uint16_t bit_number);
+void ow_get_bit(void *priv);
+bool *ow_read_data(uint8_t *port, uint8_t bit, uint16_t bit_number);
 
 #endif /* ONE_WIRE_H */

@@ -3,8 +3,9 @@
 #include <lcd.h>
 #include <sb.h>
 #include <rtc.h>
-#include <itrc.h>
-#include <one_wire.h>
+#include <intc.h>
+#include <keyboard.h>
+#include <ow.h>
 
 #define _val(var)	((var)>=10)?(""):("0"), (var)
 
@@ -13,9 +14,20 @@
 
 uint8_t sb_rec_oper;	/* data reading is active */
 
+struct hutemp *ht_data;
 
 int main(void)
 {
+/*	uint8_t *p1 = (uint8_t*)0x0020;
+	uint8_t *p2 = (uint8_t*)0x0028;
+*/
+
+	port_pin prev_but = {(uint8_t*)0x0020, 0};
+	port_pin up_but   = {(uint8_t*)0x0020, 1};
+	port_pin down_but = {(uint8_t*)0x0020, 2};
+	port_pin next_but = {(uint8_t*)0x0020, 3};
+	port_pin hts	  = {(uint8_t*)0x0020, 4};
+
 	char top_str[STR_LEN];	/* top string of LCD */
 	char bot_str[STR_LEN];	/* bottom string of LCD */
 
@@ -31,7 +43,12 @@ int main(void)
 	__delay_ms(500UL);
 
 	/* init callbacks */
-	set_cb(&p2_isr_cb, one_wire_get_bit, NULL);
+	intc_p1_add_cb(hts.pin, ow_get_bit, (void*)&hts);
+	intc_p1_add_cb(prev_but.pin, prev_key_pressed, NULL);
+	intc_p1_add_cb(up_but.pin, up_key_pressed, NULL);
+	intc_p1_add_cb(down_but.pin, down_key_pressed, NULL);
+	intc_p1_add_cb(next_but.pin, next_key_pressed, NULL);
+
 
 	rtc_write_ack();
 
@@ -41,7 +58,7 @@ int main(void)
 
 		/* data reading from HT sensor */
 		if (sb_rec_oper) {
-			sb_receive();
+			ht_data = sb_receive(hts.port, hts.pin, 40);
 			sb_rec_oper = 0;
 		}
 		/* data writing to RTC */
@@ -73,18 +90,17 @@ int main(void)
 		switch (c_scr) {
 		/* humidity/temperature screen */
 		case HT_SCR:
-			if (0)
+			if (ht_data == NULL) {
 				lcd_wr_scr("Sensor error", 0x42);
-			else if (0)
-				lcd_wr_scr("Data error", 0x43);
-			else {
+			} else {
 				sprintf(top_str, \
 					" hum: %d.%d%%", \
-					ht_data.hum/10, ht_data.hum%10);
+					ht_data->hum/10, ht_data->hum%10);
 				lcd_wr_str(top_str, 0x00);
 				sprintf(bot_str, \
-					 "temp: %d.%d%cC", \
-					ht_data.temp/10, ht_data.temp%10, 0xDF);
+					"temp: %d.%d%cC", \
+					ht_data->temp/10, ht_data->temp%10, \
+					0xDF);
 				lcd_wr_str(bot_str, 0x40);
 			}
 			break;
